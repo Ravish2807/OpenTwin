@@ -1,0 +1,61 @@
+VERSION ""
+
+NS_ :
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: ECU_ENGINE ECU_BODY ECU_DIAG ECU_DASHBOARD
+
+BO_ 256 Engine_Data: 8 ECU_ENGINE
+ SG_ EngineSpeed : 0|16@1+ (0.25,0) [0|8000] "rpm" ECU_DASHBOARD
+ SG_ VehicleSpeed : 16|16@1+ (0.01,0) [0|250] "km/h" ECU_DASHBOARD
+ SG_ ThrottlePosition : 32|8@1+ (0.392157,0) [0|100] "%" ECU_DASHBOARD
+ SG_ EngineTemp : 40|8@1+ (1,-40) [-40|150] "degC" ECU_DASHBOARD
+ SG_ OilPressure : 48|8@1+ (0.05,0) [0|10] "bar" ECU_DASHBOARD
+
+BO_ 512 Vehicle_Status: 8 ECU_BODY
+ SG_ FuelLevel : 0|8@1+ (0.5,0) [0|100] "%" ECU_DASHBOARD
+ SG_ BatterySOC : 8|8@1+ (0.5,0) [0|100] "%" ECU_DASHBOARD
+ SG_ Gear : 16|4@1+ (1,0) [0|7] "" ECU_DASHBOARD
+ SG_ BrakeActive : 20|1@1+ (1,0) [0|1] "" ECU_DASHBOARD
+ SG_ TurnSignal : 21|3@1+ (1,0) [0|3] "" ECU_DASHBOARD
+ SG_ SteeringAngle : 24|16@1- (0.1,0) [-720|720] "deg" ECU_DASHBOARD
+ SG_ HeadlightsActive : 40|1@1+ (1,0) [0|1] "" ECU_DASHBOARD
+
+BO_ 768 Diagnostics_Alerts: 8 ECU_DIAG
+ SG_ CheckEngineLight : 0|1@1+ (1,0) [0|1] "" ECU_DASHBOARD
+ SG_ BatteryWarning : 1|1@1+ (1,0) [0|1] "" ECU_DASHBOARD
+ SG_ TirePressureWarning : 2|1@1+ (1,0) [0|1] "" ECU_DASHBOARD
+ SG_ ABSWarning : 3|1@1+ (1,0) [0|1] "" ECU_DASHBOARD
+ SG_ Odometer : 8|32@1+ (0.1,0) [0|1000000] "km" ECU_DASHBOARD
+
+VAL_ 512 Gear 0 "P" 1 "R" 2 "N" 3 "D" 4 "1" 5 "2" 6 "3" 7 "S" ;
+VAL_ 512 TurnSignal 0 "NONE" 1 "LEFT" 2 "RIGHT" 3 "HAZARD" ;
