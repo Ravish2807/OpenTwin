@@ -6,13 +6,13 @@ OpenTwin is a 100% software-based automotive network emulator designed for testi
 
 ---
 
-## 1. What This Project Is
+## 1. What is OpenTwin ?
 
 OpenTwin acts as a **"Ghost Vehicle"** by taking pre-recorded or synthetic CAN bus traffic logs and injecting them into a virtual Linux network interface (`vcan0`). Downstream applications receive the raw high-frequency hexadecimal frames, decode them using standard CAN Database (`.dbc`) definitions, and visualize live vehicle metrics in real time.
 
 ---
 
-## 2. What We Do
+## 2. Features of OpenTwin
 
 - **Virtual CAN Transport**: Emulates an automotive CAN bus in RAM via Linux SocketCAN (`vcan0`) or cross-platform loopback.
 - **Log Injection Engine**: Replays `.log` and `.asc` vehicle drive cycles at their original recorded timestamps.
