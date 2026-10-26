@@ -16,82 +16,8 @@ OpenTwin is a 100% software-based automotive network emulator designed for devel
 The following interactive architecture diagram (designed in the **[Archify](https://github.com/tt-a1i/archify)** & **[xyflow](https://github.com/xyflow/xyflow)** node-pipeline specification) showcases the end-to-end data flow: from synthetic drive cycle generation and Linux SocketCAN transport, to the asynchronous DBC decoding backend and the active multi-workspace telemetry suite.
 
 <p align="center">
-  <img src="docs/architecture_archify.svg" alt="OpenTwin Architecture Flowchart" width="100%" />
+  <img src="./docs/architecture_flow.svg" alt="OpenTwin Architecture Flow" width="100%" />
 </p>
-
-### Native Codebase Flowchart & Workspace Breakdown
-
-```mermaid
-flowchart LR
-    %% =========================================================================
-    %% ARCHIFY CODEBASE ARCHITECTURE & DATA FLOW
-    %% =========================================================================
-
-    classDef fileNode fill:#0b1120,stroke:#38bdf8,stroke-width:1.8px,color:#e2e8f0;
-    classDef dbcNode fill:#1e1b4b,stroke:#818cf8,stroke-width:1.8px,color:#e0e7ff;
-    classDef transportNode fill:#022c22,stroke:#10b981,stroke-width:2px,color:#a7f3d0;
-    classDef backendNode fill:#1c1917,stroke:#f59e0b,stroke-width:2px,color:#fef3c7;
-    classDef activeWorkspace fill:#042f2e,stroke:#14b8a6,stroke-width:2.5px,color:#ccfbf1;
-    classDef testNode fill:#2e1065,stroke:#c084fc,stroke-width:1.8px,color:#f5f3ff;
-
-    subgraph SOURCES [" 📁 Data Sources & Network Layer "]
-        direction TB
-        LOG_GEN["🐍 <code>data_logs/generate_logs.py</code><br/>Procedural Drive Cycle Engine"]:::fileNode
-        LOG_FILE[("📄 <code>data_logs/sample_drive.log</code><br/>5,100+ Raw candump Frames")]:::fileNode
-        VCAN_SCRIPT["📜 <code>scripts/setup_vcan.sh</code><br/>SocketCAN Kernel Setup (vcan0)"]:::fileNode
-        REPLAY_SCRIPT["📜 <code>scripts/replay_log.sh</code><br/>canplayer Traffic Injector"]:::fileNode
-        
-        LOG_GEN -- "Generates timestamped frames" --> LOG_FILE
-        VCAN_SCRIPT -- "Initializes interface" --> VCAN_BUS
-        LOG_FILE -- "Ingested via canplayer" --> REPLAY_SCRIPT
-    end
-
-    subgraph TRANSPORT [" 🔌 Transport Layer (RAM Loopback) "]
-        VCAN_BUS["🌐 <b>Linux SocketCAN (vcan0)</b><br/>Virtual CAN Bus Device in Kernel"]:::transportNode
-        REPLAY_SCRIPT == "canplayer -I sample_drive.log vcan0=can0" ==> VCAN_BUS
-    end
-
-    subgraph BACKEND [" ⚙️ Layer 3: Backend Decoder & Streamer "]
-        direction TB
-        DBC_DEF[("📖 <code>dbc_definitions/vehicle_base.dbc</code><br/>CAN Matrix (0x100, 0x200, 0x300)")]:::dbcNode
-        PY_DECODER["🧠 <code>emulator_core/decoder.py</code><br/>CANDecoder (cantools unpack)"]:::backendNode
-        PY_SERVER["⚡ <code>emulator_core/server.py</code><br/>Async WebSocket & HTTP Server"]:::backendNode
-
-        VCAN_BUS == "Raw Hex CAN Frames (50Hz)" ==> PY_DECODER
-        DBC_DEF -. "Loads bit layout, scale & offsets" .-> PY_DECODER
-        PY_DECODER -- "Physical metrics: RPM, Speed, Temp" --> PY_SERVER
-    end
-
-    subgraph FRONTEND [" 🚀 CURRENTLY WORKED AREA: Telemetry Workbench v2.4 PRO "]
-        direction TB
-        UI_HUB["🌐 <code>frontend_dashboard/index.html</code><br/>Multi-View Glassmorphic Workbench"]:::activeWorkspace
-        UI_LOGIC["⚡ <code>frontend_dashboard/app.js</code><br/>WebSocket Client & 60fps Dispatcher"]:::activeWorkspace
-        UI_STYLE["🎨 <code>frontend_dashboard/style.css</code><br/>Theme Engine (Comfort, Sport, Eco, Cyber)"]:::activeWorkspace
-
-        W1["🚀 Cockpit Cluster HUD<br/>• Swept Tachometer & Velocity<br/>• Rotating Wheel Chassis HUD<br/>• 4-Wheel TPMS & Alert Rack"]:::activeWorkspace
-        W2["📈 60 FPS Signal Oscilloscope<br/>• Multi-Trace Rolling Waveform Plots<br/>• Freeze, Time-Window & Peak Analytics"]:::activeWorkspace
-        W3["🔍 CAN Bus Frame Inspector<br/>• Wireshark-Style Byte Highlight<br/>• Live ID Filters & 💾 CSV Export"]:::activeWorkspace
-        W4["🕹️ ECU Injector & Fault Panel<br/>• Powertrain Overrides & Presets<br/>• MIL, TPMS, Battery, ABS Faults<br/>• Arbitrary Hex Frame Transmitter"]:::activeWorkspace
-        W5["📚 DBC Catalog Browser<br/>• Dynamic Message/Signal Matrix Search"]:::activeWorkspace
-
-        UI_HUB --- UI_LOGIC
-        UI_HUB --- UI_STYLE
-        UI_LOGIC --> W1
-        UI_LOGIC --> W2
-        UI_LOGIC --> W3
-        UI_LOGIC --> W4
-        UI_LOGIC --> W5
-    end
-
-    PY_SERVER <== "ws://localhost:8080/ws<br/>[JSON Telemetry Broadcast @ 30Hz]" ==> UI_LOGIC
-    W4 -. "Bidirectional Injection: 0x100#... / 0x300#...<br/>[inject_frame action]" .-> PY_SERVER
-    PY_SERVER -. "Forwards Injected Frames" .-> VCAN_BUS
-
-    subgraph TESTS [" 🧪 Continuous Verification "]
-        TEST_SUITE["🧪 <code>tests/test_pipeline.py</code><br/>6 Unit & Integration Tests (100% Pass)"]:::testNode
-        TEST_SUITE -. "Validates DBC, frames, and WS streaming" .-> BACKEND
-    end
-```
 
 > ⚡ **Active Sprint Focus**: Ongoing work centers on the **Frontend Workbench (`frontend_dashboard/`)** featuring real-time 60 FPS canvas waveform plotting, interactive vehicle chassis kinematics, bidirectional CAN injection, and CSV export.
 
@@ -298,7 +224,7 @@ OpenTwin/
 ├── dbc_definitions/
 │   └── vehicle_base.dbc         # Standard CAN database matrix (0x100, 0x200, 0x300)
 ├── docs/
-│   └── architecture_archify.svg # Interactive Archify animated codebase flow
+│   └── architecture_flow.svg    # ActionCloud/Archify-style animated architecture flow
 ├── emulator_core/
 │   ├── decoder.py               # DBC parser & CAN frame decoding engine
 │   ├── server.py                # Asynchronous telemetry & WebSocket server
