@@ -36,6 +36,8 @@ class OpenTwinServer:
         self.replay_file = os.path.abspath(replay_file) if replay_file else None
         self.replay_loop = replay_loop
         self.replay_speed = replay_speed
+        self.replay_paused = False
+        self.replay_restart_requested = False
         self.http_port = http_port
         self.ws_port = ws_port
 
@@ -64,11 +66,41 @@ class OpenTwinServer:
             "Odometer": 0.0,
             "LastFrameTimestamp": 0.0,
             "FPS": 0,
-            "TotalFrames": 0
+            "TotalFrames": 0,
+            "ReplayPaused": False,
+            "ReplaySpeed": self.replay_speed
         }
         self.frame_count = 0
         self.last_fps_calc = time.time()
         self.recent_frames = []
+
+    def get_dbc_summary(self):
+        """Returns structured JSON summary of DBC messages & signals."""
+        messages_info = []
+        for msg in self.decoder.db.messages:
+            signals_info = []
+            for sig in msg.signals:
+                signals_info.append({
+                    "name": sig.name,
+                    "start": sig.start,
+                    "length": sig.length,
+                    "byte_order": sig.byte_order,
+                    "scale": sig.scale,
+                    "offset": sig.offset,
+                    "minimum": sig.minimum,
+                    "maximum": sig.maximum,
+                    "unit": sig.unit or "",
+                    "choices": {str(k): str(v) for k, v in sig.choices.items()} if sig.choices else None
+                })
+            messages_info.append({
+                "name": msg.name,
+                "frame_id": msg.frame_id,
+                "frame_id_hex": f"0x{msg.frame_id:03X}",
+                "length": msg.length,
+                "senders": msg.senders,
+                "signals": signals_info
+            })
+        return messages_info
 
     def update_telemetry(self, decoded_frame: dict):
         self.frame_count += 1
@@ -187,8 +219,22 @@ class OpenTwinServer:
 
             logger.info(f"Loaded {len(lines)} frames for replay")
             last_ts = None
+            self.replay_restart_requested = False
 
             for line in lines:
+                if self.replay_restart_requested:
+                    logger.info("Replay restart requested.")
+                    break
+
+                while self.replay_paused:
+                    self.telemetry_state["ReplayPaused"] = True
+                    await asyncio.sleep(0.1)
+                    if self.replay_restart_requested:
+                        break
+
+                self.telemetry_state["ReplayPaused"] = False
+                self.telemetry_state["ReplaySpeed"] = round(self.replay_speed, 2)
+
                 line = line.strip()
                 if not line or not line.startswith("("):
                     continue
@@ -206,7 +252,7 @@ class OpenTwinServer:
                     raw_bytes = bytes.fromhex(hex_payload)
 
                     if last_ts is not None:
-                        delay = (timestamp - last_ts) / self.replay_speed
+                        delay = (timestamp - last_ts) / max(0.1, self.replay_speed)
                         if delay > 0:
                             # Clamp sleep to prevent freezing on large gaps
                             await asyncio.sleep(min(delay, 0.5))
@@ -227,6 +273,9 @@ class OpenTwinServer:
                 except Exception as e:
                     logger.debug(f"Error parsing replay line '{line}': {e}")
 
+            if self.replay_restart_requested:
+                continue
+
             if not self.replay_loop:
                 logger.info("Replay completed (non-looping mode).")
                 break
@@ -242,8 +291,47 @@ class OpenTwinServer:
             async for msg in ws:
                 if msg.type == web.WSMsgType.TEXT:
                     data = json.loads(msg.data)
-                    if data.get("action") == "ping":
+                    action = data.get("action")
+                    if action == "ping":
                         await ws.send_str(json.dumps({"type": "pong", "time": time.time()}))
+                    elif action == "get_dbc":
+                        await ws.send_str(json.dumps({
+                            "type": "dbc_info",
+                            "messages": self.get_dbc_summary()
+                        }))
+                    elif action == "replay_control":
+                        cmd = data.get("cmd")
+                        if cmd == "pause":
+                            self.replay_paused = True
+                        elif cmd == "resume":
+                            self.replay_paused = False
+                        elif cmd == "toggle":
+                            self.replay_paused = not self.replay_paused
+                        elif cmd == "speed":
+                            self.replay_speed = max(0.1, min(10.0, float(data.get("speed", 1.0))))
+                        elif cmd == "restart":
+                            self.replay_restart_requested = True
+                            self.replay_paused = False
+                        self.telemetry_state["ReplayPaused"] = self.replay_paused
+                        self.telemetry_state["ReplaySpeed"] = round(self.replay_speed, 2)
+                    elif action == "inject_frame":
+                        try:
+                            can_id_raw = data.get("can_id")
+                            if isinstance(can_id_raw, str):
+                                can_id = int(can_id_raw, 16 if "0x" in can_id_raw.lower() else 10)
+                            else:
+                                can_id = int(can_id_raw)
+                            hex_str = data.get("hex_data", "").replace(" ", "")
+                            raw_bytes = bytes.fromhex(hex_str)
+                            ts = time.time()
+                            decoded = self.decoder.decode_frame(can_id, raw_bytes, ts)
+                            self.update_telemetry(decoded)
+                            if self.bus is not None:
+                                msg = can.Message(arbitration_id=can_id, data=raw_bytes, is_extended_id=(can_id > 0x7FF))
+                                self.bus.send(msg)
+                            await ws.send_str(json.dumps({"type": "inject_ack", "status": "ok", "can_id": can_id}))
+                        except Exception as err:
+                            await ws.send_str(json.dumps({"type": "inject_ack", "status": "error", "error": str(err)}))
         finally:
             self.ws_clients.discard(ws)
             logger.info(f"WebSocket client disconnected. Active clients: {len(self.ws_clients)}")
