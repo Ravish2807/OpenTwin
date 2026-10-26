@@ -1,0 +1,361 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="100%" height="100%">
+  <defs>
+    <!-- Background Grid Pattern -->
+    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(255, 255, 255, 0.04)" stroke-width="1" />
+    </pattern>
+
+    <!-- Glow Filters -->
+    <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="glow-green" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="glow-orange" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="glow-purple" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- Gradients -->
+    <linearGradient id="grad-card" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#090d16" stop-opacity="0.9" />
+    </linearGradient>
+
+    <!-- Marker Arrowheads -->
+    <marker id="arrow-cyan" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#00f0ff" />
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981" />
+    </marker>
+    <marker id="arrow-orange" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#f59e0b" />
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#c084fc" />
+    </marker>
+
+    <!-- CSS Keyframe Animations for Archify-Style Flow -->
+    <style>
+      @keyframes dashFlow {
+        from { stroke-dashoffset: 48; }
+        to { stroke-dashoffset: 0; }
+      }
+      @keyframes dashFlowReverse {
+        from { stroke-dashoffset: 0; }
+        to { stroke-dashoffset: 48; }
+      }
+      @keyframes pulseGlow {
+        0%, 100% { opacity: 0.8; filter: drop-shadow(0 0 6px #00f0ff); }
+        50% { opacity: 1; filter: drop-shadow(0 0 14px #00f0ff); }
+      }
+      @keyframes liveBlink {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 1; }
+      }
+      
+      .animated-flow-orange {
+        stroke-dasharray: 6 6;
+        animation: dashFlow 1.4s linear infinite;
+      }
+      .animated-flow-green {
+        stroke-dasharray: 7 7;
+        animation: dashFlow 1.2s linear infinite;
+      }
+      .animated-flow-cyan {
+        stroke-dasharray: 8 8;
+        animation: dashFlow 1.0s linear infinite;
+      }
+      .animated-flow-reverse {
+        stroke-dasharray: 6 6;
+        animation: dashFlowReverse 1.5s linear infinite;
+      }
+      .live-dot {
+        animation: liveBlink 1.2s ease-in-out infinite;
+      }
+      .active-border-pulse {
+        animation: pulseGlow 3s ease-in-out infinite;
+      }
+    </style>
+  </defs>
+
+  <!-- Canvas Outer Background -->
+  <rect width="1200" height="720" rx="16" fill="#070a13" stroke="#1e293b" stroke-width="2" />
+
+  <!-- Grid Layer -->
+  <rect width="1200" height="720" rx="16" fill="url(#grid)" />
+
+  <!-- Window Mockup Header (Archify Style) -->
+  <rect x="0" y="0" width="1200" height="46" rx="16" fill="#0b101d" />
+  <rect x="0" y="32" width="1200" height="14" fill="#0b101d" />
+  <line x1="0" y1="46" x2="1200" y2="46" stroke="#1e293b" stroke-width="1.5" />
+
+  <!-- Window Controls -->
+  <circle cx="28" cy="23" r="6" fill="#ef4444" />
+  <circle cx="48" cy="23" r="6" fill="#f59e0b" />
+  <circle cx="68" cy="23" r="6" fill="#10b981" />
+
+  <!-- Window Location Address Bar -->
+  <rect x="360" y="10" width="480" height="26" rx="6" fill="#060911" stroke="#1e293b" stroke-width="1" />
+  <text x="600" y="27" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="11.5" text-anchor="middle" font-weight="600">
+    🔒 https://opentwin.internal/architecture • interactive-node-flow
+  </text>
+
+  <!-- Right Window Status Tags -->
+  <rect x="1000" y="12" width="80" height="22" rx="4" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" stroke-width="1" />
+  <circle cx="1012" cy="23" r="3.5" fill="#10b981" class="live-dot" />
+  <text x="1046" y="27" fill="#34d399" font-family="'JetBrains Mono', monospace" font-size="10.5" text-anchor="middle" font-weight="700">vcan0 UP</text>
+
+  <rect x="1090" y="12" width="86" height="22" rx="4" fill="rgba(0, 240, 255, 0.15)" stroke="#00f0ff" stroke-width="1" />
+  <text x="1133" y="27" fill="#00f0ff" font-family="'JetBrains Mono', monospace" font-size="10.5" text-anchor="middle" font-weight="700">ARCHIFY v2</text>
+
+  <!-- =========================================================================
+       SUBGRAPH 1: INGESTION & DATA LOGS (Orange/Amber)
+       ========================================================================= -->
+  <rect x="30" y="70" width="230" height="280" rx="12" fill="rgba(245, 158, 11, 0.03)" stroke="#f59e0b" stroke-width="1.8" stroke-dasharray="6 4" />
+  <text x="45" y="96" fill="#fbbf24" font-family="'Rajdhani', sans-serif" font-size="14" font-weight="800" letter-spacing="1">📁 1. INGESTION &amp; REPLAY</text>
+
+  <!-- Node 1: Log Generator -->
+  <g transform="translate(45, 115)">
+    <rect width="200" height="62" rx="8" fill="url(#grad-card)" stroke="#f59e0b" stroke-width="1.2" />
+    <text x="14" y="26" fill="#fff" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700">generate_logs.py</text>
+    <text x="14" y="44" fill="#94a3b8" font-family="'Rajdhani', sans-serif" font-size="11" font-weight="600">Synthetic Drive-Cycle Engine</text>
+  </g>
+
+  <!-- Node 2: candump Log File -->
+  <g transform="translate(45, 195)">
+    <rect width="200" height="62" rx="8" fill="url(#grad-card)" stroke="#f59e0b" stroke-width="1.2" />
+    <text x="14" y="26" fill="#fbbf24" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700">sample_drive.log</text>
+    <text x="14" y="44" fill="#94a3b8" font-family="'Rajdhani', sans-serif" font-size="11" font-weight="600">5,100+ Raw Hex Frames</text>
+  </g>
+
+  <!-- Node 3: canplayer -->
+  <g transform="translate(45, 275)">
+    <rect width="200" height="60" rx="8" fill="url(#grad-card)" stroke="#f59e0b" stroke-width="1.2" />
+    <text x="14" y="25" fill="#fff" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700">canplayer Injector</text>
+    <text x="14" y="43" fill="#94a3b8" font-family="'Rajdhani', sans-serif" font-size="11" font-weight="600">Replays @ Original Timestamps</text>
+  </g>
+
+  <!-- Internal Connections Subgraph 1 -->
+  <line x1="145" y1="177" x2="145" y2="195" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrow-orange)" />
+  <line x1="145" y1="257" x2="145" y2="275" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrow-orange)" />
+
+  <!-- =========================================================================
+       SUBGRAPH 2: TRANSPORT & VIRTUAL CAN BUS (Emerald/Green)
+       ========================================================================= -->
+  <rect x="300" y="70" width="230" height="280" rx="12" fill="rgba(16, 185, 129, 0.03)" stroke="#10b981" stroke-width="1.8" stroke-dasharray="6 4" />
+  <text x="315" y="96" fill="#34d399" font-family="'Rajdhani', sans-serif" font-size="14" font-weight="800" letter-spacing="1">🔌 2. VIRTUAL TRANSPORT</text>
+
+  <!-- Node 4: setup_vcan.sh -->
+  <g transform="translate(315, 115)">
+    <rect width="200" height="62" rx="8" fill="url(#grad-card)" stroke="#10b981" stroke-width="1.2" />
+    <text x="14" y="26" fill="#fff" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700">setup_vcan.sh</text>
+    <text x="14" y="44" fill="#94a3b8" font-family="'Rajdhani', sans-serif" font-size="11" font-weight="600">Loads vcan Kernel Module</text>
+  </g>
+
+  <!-- Node 5: Linux SocketCAN vcan0 Device -->
+  <g transform="translate(315, 205)">
+    <rect width="200" height="85" rx="8" fill="#022c22" stroke="#10b981" stroke-width="2" />
+    <circle cx="180" cy="20" r="4" fill="#10b981" class="live-dot" />
+    <text x="14" y="28" fill="#6ee7b7" font-family="'Orbitron', sans-serif" font-size="13" font-weight="900">vcan0 (SocketCAN)</text>
+    <text x="14" y="50" fill="#a7f3d0" font-family="'JetBrains Mono', monospace" font-size="10.5">Bitrate: 500 kbps</text>
+    <text x="14" y="68" fill="#34d399" font-family="'JetBrains Mono', monospace" font-size="10.5">Mode: RAM Loopback</text>
+  </g>
+
+  <!-- Internal Connections Subgraph 2 -->
+  <line x1="415" y1="177" x2="415" y2="205" stroke="#10b981" stroke-width="1.5" marker-end="url(#arrow-green)" />
+
+  <!-- =========================================================================
+       SUBGRAPH 3: DBC SPECIFICATION & MATRIX (Purple)
+       ========================================================================= -->
+  <rect x="30" y="390" width="500" height="295" rx="12" fill="rgba(192, 132, 252, 0.03)" stroke="#c084fc" stroke-width="1.8" stroke-dasharray="6 4" />
+  <text x="45" y="416" fill="#c084fc" font-family="'Rajdhani', sans-serif" font-size="14" font-weight="800" letter-spacing="1">📖 3. CAN DATABASE (DBC) SPECIFICATION</text>
+
+  <!-- Node 6: DBC File -->
+  <g transform="translate(45, 435)">
+    <rect width="470" height="60" rx="8" fill="url(#grad-card)" stroke="#c084fc" stroke-width="1.2" />
+    <text x="16" y="26" fill="#e9d5ff" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="800">dbc_definitions/vehicle_base.dbc</text>
+    <text x="16" y="45" fill="#a855f7" font-family="'JetBrains Mono', monospace" font-size="11">Standard Network Dictionary Matrix</text>
+  </g>
+
+  <!-- DBC Messages Breakdown Cards -->
+  <g transform="translate(45, 510)">
+    <!-- 0x100 -->
+    <rect x="0" y="0" width="146" height="155" rx="6" fill="#0f172a" stroke="#3b82f6" stroke-width="1" />
+    <text x="10" y="22" fill="#60a5fa" font-family="'JetBrains Mono', monospace" font-size="11.5" font-weight="800">0x100 (256)</text>
+    <text x="10" y="40" fill="#fff" font-family="'Rajdhani', sans-serif" font-size="12" font-weight="700">Engine_Data</text>
+    <text x="10" y="60" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9.5">• EngineSpeed</text>
+    <text x="10" y="78" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9.5">• VehicleSpeed</text>
+    <text x="10" y="96" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9.5">• ThrottlePos</text>
+    <text x="10" y="114" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9.5">• EngineTemp</text>
+    <text x="10" y="132" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9.5">• OilPressure</text>
+
+    <!-- 0x200 -->
+    <rect x="162" y="0" width="146" height="155" rx="6" fill="#0f172a" stroke="#10b981" stroke-width="1" />
+    <text x="172" y="22" fill="#34d399" font-family="'JetBrains Mono', monospace" font-size="11.5" font-weight="800">0x200 (512)</text>
+    <text x="172" y="40" fill="#fff" font-family="'Rajdhani', sans-serif" font-size="12" font-weight="700">Vehicle_Status</text>
+    <text x="172" y="60" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9.5">• FuelLevel</text>
+    <text x="172" y="78" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9.5">• BatterySOC</text>
+    <text x="172" y="96" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9.5">• Gear (PRNDS)</text>
+    <text x="172" y="114" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9.5">• SteeringAngle</text>
+    <text x="172" y="132" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9.5">• TurnSignals</text>
+
+    <!-- 0x300 -->
+    <rect x="324" y="0" width="146" height="155" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="1" />
+    <text x="334" y="22" fill="#fbbf24" font-family="'JetBrains Mono', monospace" font-size="11.5" font-weight="800">0x300 (768)</text>
+    <text x="334" y="40" fill="#fff" font-family="'Rajdhani', sans-serif" font-size="12" font-weight="700">Diagnostics</text>
+    <text x="334" y="60" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9.5">• CheckEngine</text>
+    <text x="334" y="78" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9.5">• BatteryAlert</text>
+    <text x="334" y="96" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9.5">• TPMSWarning</text>
+    <text x="334" y="114" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9.5">• ABSWarning</text>
+    <text x="334" y="132" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9.5">• Odometer</text>
+  </g>
+
+  <!-- =========================================================================
+       SUBGRAPH 4: DECODER & WEBSOCKET ENGINE (Amber/Orange)
+       ========================================================================= -->
+  <rect x="560" y="70" width="240" height="280" rx="12" fill="rgba(245, 158, 11, 0.03)" stroke="#f59e0b" stroke-width="1.8" stroke-dasharray="6 4" />
+  <text x="575" y="96" fill="#fbbf24" font-family="'Rajdhani', sans-serif" font-size="14" font-weight="800" letter-spacing="1">⚙️ 4. DECODER &amp; BACKEND</text>
+
+  <!-- Node 7: decoder.py -->
+  <g transform="translate(575, 115)">
+    <rect width="210" height="85" rx="8" fill="url(#grad-card)" stroke="#f59e0b" stroke-width="1.5" />
+    <text x="14" y="26" fill="#fbbf24" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700">decoder.py</text>
+    <text x="14" y="46" fill="#fff" font-family="'Rajdhani', sans-serif" font-size="11.5" font-weight="700">cantools + python-can</text>
+    <text x="14" y="66" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="10">Unpacks Bitfields &amp; Scaling</text>
+  </g>
+
+  <!-- Node 8: server.py -->
+  <g transform="translate(575, 225)">
+    <rect width="210" height="95" rx="8" fill="#1c1917" stroke="#f59e0b" stroke-width="1.8" />
+    <circle cx="190" cy="22" r="4" fill="#f59e0b" class="live-dot" />
+    <text x="14" y="26" fill="#fbbf24" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700">server.py</text>
+    <text x="14" y="46" fill="#fff" font-family="'Rajdhani', sans-serif" font-size="11.5" font-weight="700">aiohttp Async Server</text>
+    <text x="14" y="66" fill="#fde68a" font-family="'JetBrains Mono', monospace" font-size="10">ws://localhost:8080/ws</text>
+    <text x="14" y="82" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9.5">Broadcaster @ 30 Hz</text>
+  </g>
+
+  <!-- Internal Decoder Connections -->
+  <line x1="680" y1="200" x2="680" y2="225" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrow-orange)" />
+
+  <!-- =========================================================================
+       SUBGRAPH 5: ACTIVE WORKBENCH SUITE (Cyan/Teal) - CURRENTLY WORKED AREA
+       ========================================================================= -->
+  <rect x="830" y="70" width="340" height="615" rx="14" fill="rgba(0, 240, 255, 0.04)" stroke="#00f0ff" stroke-width="2.5" class="active-border-pulse" />
+  
+  <!-- Active Sprint Badge -->
+  <rect x="850" y="88" width="300" height="26" rx="6" fill="rgba(0, 240, 255, 0.15)" stroke="#00f0ff" stroke-width="1" />
+  <text x="1000" y="105" fill="#00f0ff" font-family="'Orbitron', sans-serif" font-size="11" font-weight="900" text-anchor="middle" letter-spacing="1.5">
+    ⚡ ACTIVE WORKSPACE: v2.4 PRO
+  </text>
+
+  <!-- Node 9: Frontend Shell -->
+  <g transform="translate(850, 125)">
+    <rect width="300" height="65" rx="8" fill="#030712" stroke="#00f0ff" stroke-width="1.4" />
+    <text x="14" y="24" fill="#00f0ff" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700">frontend_dashboard/</text>
+    <text x="14" y="42" fill="#fff" font-family="'Rajdhani', sans-serif" font-size="11" font-weight="700">HTML5 Glassmorphism UI Hub</text>
+    <text x="14" y="56" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="9.5">index.html • style.css • app.js</text>
+  </g>
+
+  <!-- Workspace 1: Cockpit Cluster -->
+  <g transform="translate(850, 205)">
+    <rect width="300" height="78" rx="8" fill="url(#grad-card)" stroke="#38bdf8" stroke-width="1.2" />
+    <text x="14" y="24" fill="#38bdf8" font-family="'Rajdhani', sans-serif" font-size="13" font-weight="800">🚀 1. Cockpit Cluster HUD</text>
+    <text x="14" y="44" fill="#e2e8f0" font-family="'Rajdhani', sans-serif" font-size="11.5">• Swept Tachometer &amp; Speedometer Gauges</text>
+    <text x="14" y="62" fill="#94a3b8" font-family="'Rajdhani', sans-serif" font-size="11">• Rotating Wheel Chassis HUD &amp; 4-Wheel TPMS</text>
+  </g>
+
+  <!-- Workspace 2: Signal Oscilloscope -->
+  <g transform="translate(850, 295)">
+    <rect width="300" height="78" rx="8" fill="url(#grad-card)" stroke="#38bdf8" stroke-width="1.2" />
+    <text x="14" y="24" fill="#38bdf8" font-family="'Rajdhani', sans-serif" font-size="13" font-weight="800">📈 2. 60 FPS Signal Oscilloscope</text>
+    <text x="14" y="44" fill="#e2e8f0" font-family="'Rajdhani', sans-serif" font-size="11.5">• Rolling Waveform Plotter (RPM, Speed, Throttle)</text>
+    <text x="14" y="62" fill="#94a3b8" font-family="'Rajdhani', sans-serif" font-size="11">• Freeze, Timespan Zoom &amp; Peak Statistics</text>
+  </g>
+
+  <!-- Workspace 3: Bus Inspector -->
+  <g transform="translate(850, 385)">
+    <rect width="300" height="78" rx="8" fill="url(#grad-card)" stroke="#38bdf8" stroke-width="1.2" />
+    <text x="14" y="24" fill="#38bdf8" font-family="'Rajdhani', sans-serif" font-size="13" font-weight="800">🔍 3. CAN Bus Frame Inspector</text>
+    <text x="14" y="44" fill="#e2e8f0" font-family="'Rajdhani', sans-serif" font-size="11.5">• Wireshark-Style Byte Highlight (Byte 0..7)</text>
+    <text x="14" y="62" fill="#94a3b8" font-family="'Rajdhani', sans-serif" font-size="11">• Live ID Filter &amp; 💾 One-Click CSV Export</text>
+  </g>
+
+  <!-- Workspace 4: ECU Injector & Fault Panel -->
+  <g transform="translate(850, 475)">
+    <rect width="300" height="88" rx="8" fill="url(#grad-card)" stroke="#f59e0b" stroke-width="1.5" />
+    <text x="14" y="24" fill="#fbbf24" font-family="'Rajdhani', sans-serif" font-size="13" font-weight="800">🕹️ 4. ECU Injector &amp; DTC Faults</text>
+    <text x="14" y="44" fill="#e2e8f0" font-family="'Rajdhani', sans-serif" font-size="11.5">• Signal Override Sliders (RPM, Speed, PRND)</text>
+    <text x="14" y="60" fill="#e2e8f0" font-family="'Rajdhani', sans-serif" font-size="11.5">• DTC Fault Injections: Check Engine, TPMS, ABS</text>
+    <text x="14" y="76" fill="#94a3b8" font-family="'Rajdhani', sans-serif" font-size="11">• Arbitrary Hex Frame Transmitter with ACKs</text>
+  </g>
+
+  <!-- Workspace 5: DBC Catalog & Themes -->
+  <g transform="translate(850, 575)">
+    <rect width="300" height="85" rx="8" fill="url(#grad-card)" stroke="#c084fc" stroke-width="1.2" />
+    <text x="14" y="24" fill="#c084fc" font-family="'Rajdhani', sans-serif" font-size="13" font-weight="800">📚 5. DBC Explorer &amp; Theme Engine</text>
+    <text x="14" y="44" fill="#e2e8f0" font-family="'Rajdhani', sans-serif" font-size="11.5">• Interactive Signal Matrix &amp; Enum Tree</text>
+    <text x="14" y="62" fill="#a855f7" font-family="'JetBrains Mono', monospace" font-size="10.5">Themes: COMFORT | SPORT | ECO | CYBER</text>
+  </g>
+
+  <!-- =========================================================================
+       SUBGRAPH 6: AUTOMATED TEST VERIFICATION (Purple/Violet)
+       ========================================================================= -->
+  <rect x="560" y="390" width="240" height="295" rx="12" fill="rgba(168, 85, 247, 0.03)" stroke="#a855f7" stroke-width="1.8" stroke-dasharray="6 4" />
+  <text x="575" y="416" fill="#c084fc" font-family="'Rajdhani', sans-serif" font-size="14" font-weight="800" letter-spacing="1">🧪 6. CONTINUOUS TEST PIPELINE</text>
+
+  <g transform="translate(575, 435)">
+    <rect width="210" height="85" rx="8" fill="url(#grad-card)" stroke="#a855f7" stroke-width="1.2" />
+    <text x="14" y="24" fill="#c084fc" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700">test_pipeline.py</text>
+    <text x="14" y="46" fill="#fff" font-family="'Rajdhani', sans-serif" font-size="11.5" font-weight="700">6 Automated Tests</text>
+    <text x="14" y="66" fill="#34d399" font-family="'JetBrains Mono', monospace" font-size="10.5 font-weight="700">Status: 100% Passing</text>
+  </g>
+
+  <g transform="translate(575, 535)">
+    <rect width="210" height="125" rx="8" fill="#0f172a" stroke="#64748b" stroke-width="1" />
+    <text x="12" y="20" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="10">• DBC Parsing Test</text>
+    <text x="12" y="40" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="10">• Engine 0x100 Dec</text>
+    <text x="12" y="60" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="10">• Status 0x200 Dec</text>
+    <text x="12" y="80" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="10">• Diag 0x300 Dec</text>
+    <text x="12" y="100" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="10">• Log Integrity Check</text>
+    <text x="12" y="118" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="10">• Live WS Broadcast</text>
+  </g>
+
+  <!-- =========================================================================
+       DYNAMIC ANIMATED CONNECTORS (ARCHIFY STYLE)
+       ========================================================================= -->
+
+  <!-- 1. canplayer to vcan0 (Thick animated orange line) -->
+  <path d="M 245 305 L 315 255" fill="none" stroke="#f59e0b" stroke-width="2.5" class="animated-flow-orange" marker-end="url(#arrow-orange)" />
+  <rect x="250" y="265" width="55" height="18" rx="3" fill="#090d16" stroke="#f59e0b" stroke-width="0.8" />
+  <text x="277" y="278" fill="#fbbf24" font-family="'JetBrains Mono', monospace" font-size="8.5" text-anchor="middle">50 Hz</text>
+
+  <!-- 2. vcan0 to decoder.py (Thick animated green line) -->
+  <path d="M 515 245 L 575 160" fill="none" stroke="#10b981" stroke-width="2.5" class="animated-flow-green" marker-end="url(#arrow-green)" />
+  <rect x="520" y="185" width="50" height="18" rx="3" fill="#090d16" stroke="#10b981" stroke-width="0.8" />
+  <text x="545" y="198" fill="#34d399" font-family="'JetBrains Mono', monospace" font-size="8.5" text-anchor="middle">SocketCAN</text>
+
+  <!-- 3. DBC to decoder.py (Purple dashed line) -->
+  <path d="M 450 435 L 575 185" fill="none" stroke="#c084fc" stroke-width="1.8" stroke-dasharray="5 5" marker-end="url(#arrow-purple)" />
+  <rect x="480" y="320" width="70" height="18" rx="3" fill="#090d16" stroke="#c084fc" stroke-width="0.8" />
+  <text x="515" y="333" fill="#c084fc" font-family="'JetBrains Mono', monospace" font-size="8.5" text-anchor="middle">Matrix Bind</text>
+
+  <!-- 4. server.py to Frontend Dashboard (Cyan animated high-speed telemetry line) -->
+  <path d="M 785 272 L 850 160" fill="none" stroke="#00f0ff" stroke-width="3" class="animated-flow-cyan" marker-end="url(#arrow-cyan)" />
+  <rect x="790" y="195" width="60" height="20" rx="3" fill="#030712" stroke="#00f0ff" stroke-width="1" />
+  <text x="820" y="209" fill="#00f0ff" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" text-anchor="middle">JSON @ 30Hz</text>
+
+  <!-- 5. Frontend Injector back to Server / vcan0 (Orange reverse animated line) -->
+  <path d="M 850 519 C 780 519, 740 400, 720 320" fill="none" stroke="#f59e0b" stroke-width="2.2" class="animated-flow-reverse" marker-end="url(#arrow-orange)" />
+  <rect x="735" y="450" width="95" height="20" rx="3" fill="#030712" stroke="#f59e0b" stroke-width="1" />
+  <text x="782" y="464" fill="#fbbf24" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" text-anchor="middle">inject_frame (Hex)</text>
+
+</svg>
