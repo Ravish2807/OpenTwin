@@ -1,263 +1,626 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="comfort">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OpenTwin — Digital Vehicle Network Cluster</title>
+  <title>OpenTwin — Automotive CAN Network Emulator & Telemetry Workbench</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="app-container">
-    <!-- Header / Status Bar -->
-    <header class="top-bar">
-      <div class="brand">
-        <div class="brand-logo"></div>
-        <div class="brand-text">
-          <h1>OPENTWIN</h1>
-          <span class="tag">VIRTUAL CAN CLUSTER & REPLAY ENGINE</span>
+  <div class="workbench-layout">
+    <!-- Top Master Control Bar -->
+    <header class="master-header">
+      <div class="header-left">
+        <div class="brand-badge">
+          <div class="brand-glyph"></div>
+          <div class="brand-title">
+            <div class="brand-name">OPENTWIN <span class="version-tag">v2.4 PRO</span></div>
+            <div class="brand-sub">AUTOMOTIVE CAN NETWORK EMULATOR & VIRTUAL TWIN</div>
+          </div>
         </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="workbench-tabs">
+          <button class="nav-tab active" data-tab="cockpit">
+            <span class="tab-icon">🚀</span> Cockpit Cluster
+          </button>
+          <button class="nav-tab" data-tab="oscilloscope">
+            <span class="tab-icon">📈</span> Signal Grapher
+          </button>
+          <button class="nav-tab" data-tab="inspector">
+            <span class="tab-icon">🔍</span> Bus Inspector
+          </button>
+          <button class="nav-tab" data-tab="injector">
+            <span class="tab-icon">🕹️</span> ECU Injector
+          </button>
+          <button class="nav-tab" data-tab="dbc">
+            <span class="tab-icon">📚</span> DBC Catalog
+          </button>
+        </nav>
       </div>
 
-      <div class="network-status">
-        <div class="stat-pill">
-          <span class="label">INTERFACE</span>
-          <span class="val cyan" id="iface-name">vcan0 / loopback</span>
+      <div class="header-right">
+        <!-- Replay Speed & Playback Controller -->
+        <div class="control-group replay-controller">
+          <button class="icon-btn" id="btn-replay-pause" title="Play / Pause Replay">⏸ Pause</button>
+          <button class="icon-btn" id="btn-replay-restart" title="Restart Replay">⏮ Restart</button>
+          <div class="speed-selector">
+            <span class="speed-label">SPEED:</span>
+            <button class="speed-btn" data-speed="0.5">0.5x</button>
+            <button class="speed-btn active" data-speed="1.0">1.0x</button>
+            <button class="speed-btn" data-speed="2.0">2.0x</button>
+            <button class="speed-btn" data-speed="5.0">5.0x</button>
+          </div>
         </div>
-        <div class="stat-pill">
-          <span class="label">BUS STREAM</span>
-          <span class="status-dot disconnected" id="ws-dot"></span>
-          <span class="val" id="ws-status">Connecting...</span>
+
+        <!-- Ambient Theme / Drive Mode Selector -->
+        <div class="control-group drive-mode-group">
+          <span class="mode-label">MODE:</span>
+          <div class="mode-pills">
+            <button class="mode-pill active" data-mode="comfort">COMFORT</button>
+            <button class="mode-pill" data-mode="sport">SPORT</button>
+            <button class="mode-pill" data-mode="eco">ECO</button>
+            <button class="mode-pill" data-mode="cyber">CYBER</button>
+          </div>
         </div>
-        <div class="stat-pill">
-          <span class="label">RATE</span>
-          <span class="val green" id="fps-counter">0 Hz</span>
-        </div>
-        <div class="stat-pill">
-          <span class="label">TOTAL FRAMES</span>
-          <span class="val" id="total-frames">0</span>
+
+        <!-- Telemetry Stream Health HUD -->
+        <div class="stream-hud">
+          <div class="hud-pill">
+            <span class="hud-dot disconnected" id="ws-dot"></span>
+            <span class="hud-val" id="ws-status">Connecting...</span>
+          </div>
+          <div class="hud-pill">
+            <span class="hud-label">BUS:</span>
+            <span class="hud-val cyan" id="iface-name">vcan0</span>
+          </div>
+          <div class="hud-pill">
+            <span class="hud-label">RATE:</span>
+            <span class="hud-val green" id="fps-counter">0 Hz</span>
+          </div>
         </div>
       </div>
     </header>
 
-    <!-- Main Instrument Cluster -->
-    <main class="cluster-main">
-      <!-- Left: Tachometer (RPM) -->
-      <section class="gauge-card rpm-card">
-        <div class="gauge-wrapper">
-          <svg class="radial-gauge" viewBox="0 0 300 300" id="rpm-svg">
-            <defs>
-              <linearGradient id="rpm-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#00f0ff" />
-                <stop offset="70%" stop-color="#3b82f6" />
-                <stop offset="88%" stop-color="#f59e0b" />
-                <stop offset="100%" stop-color="#ef4444" />
-              </linearGradient>
-              <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="4" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
-            </defs>
-            <!-- Background Arc -->
-            <circle class="gauge-track" cx="150" cy="150" r="115" />
-            <!-- Active Value Arc -->
-            <circle class="gauge-value" id="rpm-arc" cx="150" cy="150" r="115" stroke="url(#rpm-grad)" filter="url(#glow-cyan)" />
-            <!-- Needle -->
-            <line class="gauge-needle" id="rpm-needle" x1="150" y1="150" x2="150" y2="48" />
-            <circle class="needle-cap" cx="150" cy="150" r="12" />
-          </svg>
-          <div class="gauge-overlay">
-            <span class="gauge-title">ENGINE SPEED</span>
-            <div class="gauge-digital" id="rpm-digital">0</div>
-            <span class="gauge-unit">RPM &times; 1000</span>
-          </div>
-        </div>
+    <!-- Main Content Workspace (Tabbed) -->
+    <main class="workbench-body">
 
-        <div class="sub-meter">
-          <div class="sub-meter-header">
-            <span>THROTTLE</span>
-            <span class="sub-val" id="throttle-val">0%</span>
-          </div>
-          <div class="meter-bar">
-            <div class="meter-fill" id="throttle-fill" style="width: 0%;"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Center: Speedometer & Telemetry Hub -->
-      <section class="gauge-card center-hub">
-        <!-- Turn Signals & Indicators Top Row -->
-        <div class="indicators-row">
-          <div class="turn-signal left" id="turn-left">
-            <svg viewBox="0 0 24 24"><polygon points="18,4 6,12 18,20" /></svg>
-          </div>
+      <!-- ================= TAB 1: COCKPIT CLUSTER ================= -->
+      <section class="tab-content active" id="tab-cockpit">
+        <div class="cluster-grid">
           
-          <div class="warning-tray">
-            <div class="warn-icon" id="warn-engine" title="Check Engine">
-              <svg viewBox="0 0 24 24"><path d="M7 6v2H5v2h2v4H5v2h2v2h3v-2h4v2h3v-2h2v-2h2v-4h-2V8h-2V6h-3V4h-4v2H7z"/></svg>
+          <!-- Left Column: Tachometer & Powertrain -->
+          <div class="card gauge-card rpm-gauge-card">
+            <div class="card-header">
+              <span class="card-title">POWERTRAIN DYNAMICS</span>
+              <span class="badge" id="engine-state-badge">RUNNING</span>
             </div>
-            <div class="warn-icon" id="warn-battery" title="Battery / Alternator">
-              <svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="14" rx="2"/><path d="M8 3v3M16 3v3M8 11h3M13 11h3M14.5 9.5v3M8 15h3"/></svg>
+            
+            <div class="gauge-display-wrapper">
+              <svg class="radial-svg" viewBox="0 0 300 300" id="rpm-svg">
+                <defs>
+                  <linearGradient id="rpm-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="var(--theme-accent)" />
+                    <stop offset="65%" stop-color="var(--theme-glow)" />
+                    <stop offset="85%" stop-color="#f59e0b" />
+                    <stop offset="100%" stop-color="#ef4444" />
+                  </linearGradient>
+                  <filter id="gauge-glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="5" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                </defs>
+                <circle class="gauge-track-bg" cx="150" cy="150" r="115" />
+                <circle class="gauge-val-arc" id="rpm-arc" cx="150" cy="150" r="115" stroke="url(#rpm-gradient)" filter="url(#gauge-glow)" />
+                <line class="gauge-needle-arm" id="rpm-needle" x1="150" y1="150" x2="150" y2="48" />
+                <circle class="needle-hub" cx="150" cy="150" r="14" />
+              </svg>
+              <div class="gauge-center-readout">
+                <span class="unit-sub">TACHOMETER</span>
+                <span class="mega-digit" id="rpm-digital">0.0</span>
+                <span class="unit-lbl">RPM &times; 1000</span>
+              </div>
             </div>
-            <div class="warn-icon" id="warn-tpms" title="Tire Pressure">
-              <svg viewBox="0 0 24 24"><path d="M12 4c4 0 7 2.7 7 6v4c0 3.3-3 6-7 6s-7-2.7-7-6v-4c0-3.3 3-6 7-6zm0 4a1 1 0 00-1 1v4a1 1 0 002 0V9a1 1 0 00-1-1zm0 7a1.2 1.2 0 100 2.4A1.2 1.2 0 0012 15z"/></svg>
-            </div>
-            <div class="warn-icon" id="warn-abs" title="ABS">
-              <span class="abs-text">ABS</span>
-            </div>
-            <div class="warn-icon" id="warn-brake" title="Brake Engaged">
-              <span class="abs-text">BRAKE</span>
-            </div>
-            <div class="warn-icon" id="warn-lights" title="Headlights">
-              <svg viewBox="0 0 24 24"><path d="M12 6a6 6 0 00-6 6 6 6 0 006 6v-12zm3 1h5m-5 5h5m-5 5h5"/></svg>
+
+            <div class="linear-telemetry-row">
+              <div class="linear-metric">
+                <div class="metric-top">
+                  <span>THROTTLE INPUT</span>
+                  <span class="mono-val" id="throttle-val">0%</span>
+                </div>
+                <div class="progress-bar-rail">
+                  <div class="progress-bar-fill" id="throttle-fill" style="width: 0%;"></div>
+                </div>
+              </div>
+              <div class="linear-metric">
+                <div class="metric-top">
+                  <span>OIL PRESSURE</span>
+                  <span class="mono-val" id="oil-val">3.5 bar</span>
+                </div>
+                <div class="progress-bar-rail">
+                  <div class="progress-bar-fill accent-blue" id="oil-fill" style="width: 44%;"></div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="turn-signal right" id="turn-right">
-            <svg viewBox="0 0 24 24"><polygon points="6,4 18,12 6,20" /></svg>
+          <!-- Center Column: Speedometer HUD & Vehicle Chassis Status -->
+          <div class="card center-cluster-card">
+            
+            <!-- Indicators & Warning Array -->
+            <div class="warning-lights-bar">
+              <div class="turn-blinker left" id="turn-left" title="Left Turn Signal">
+                <svg viewBox="0 0 24 24"><polygon points="17,4 7,12 17,20" /></svg>
+              </div>
+
+              <div class="telltale-rack">
+                <div class="telltale" id="warn-engine" title="Check Engine MIL (DTC)">
+                  <svg viewBox="0 0 24 24"><path d="M7 6v2H5v2h2v4H5v2h2v2h3v-2h4v2h3v-2h2v-2h2v-4h-2V8h-2V6h-3V4h-4v2H7z"/></svg>
+                </div>
+                <div class="telltale" id="warn-battery" title="Battery / Charging System">
+                  <svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="14" rx="2"/><path d="M8 3v3M16 3v3M8 11h3M13 11h3M14.5 9.5v3M8 15h3"/></svg>
+                </div>
+                <div class="telltale" id="warn-tpms" title="Tire Pressure Monitoring System">
+                  <svg viewBox="0 0 24 24"><path d="M12 4c4 0 7 2.7 7 6v4c0 3.3-3 6-7 6s-7-2.7-7-6v-4c0-3.3 3-6 7-6zm0 4a1 1 0 00-1 1v4a1 1 0 002 0V9a1 1 0 00-1-1zm0 7a1.2 1.2 0 100 2.4A1.2 1.2 0 0012 15z"/></svg>
+                </div>
+                <div class="telltale" id="warn-abs" title="Anti-lock Braking System">
+                  <span class="telltale-text">ABS</span>
+                </div>
+                <div class="telltale" id="warn-brake" title="Hydraulic Brake Engaged">
+                  <span class="telltale-text">BRAKE</span>
+                </div>
+                <div class="telltale" id="warn-lights" title="Headlamps Active">
+                  <svg viewBox="0 0 24 24"><path d="M12 6a6 6 0 00-6 6 6 6 0 006 6v-12zm3 1h5m-5 5h5m-5 5h5"/></svg>
+                </div>
+              </div>
+
+              <div class="turn-blinker right" id="turn-right" title="Right Turn Signal">
+                <svg viewBox="0 0 24 24"><polygon points="7,4 17,12 7,20" /></svg>
+              </div>
+            </div>
+
+            <!-- Central Speed Readout -->
+            <div class="speedometer-centerpiece">
+              <div class="speed-numeral" id="speed-digital">0</div>
+              <div class="speed-unit-tag">
+                <span class="speed-metric">KM / H</span>
+                <span class="speed-mode-indicator" id="current-mode-tag">COMFORT DRIVE</span>
+              </div>
+            </div>
+
+            <!-- Transmission PRNDS Bar -->
+            <div class="transmission-bar">
+              <div class="gear-slot active" data-gear="P">P</div>
+              <div class="gear-slot" data-gear="R">R</div>
+              <div class="gear-slot" data-gear="N">N</div>
+              <div class="gear-slot" data-gear="D">D</div>
+              <div class="gear-slot" data-gear="1">1</div>
+              <div class="gear-slot" data-gear="2">2</div>
+              <div class="gear-slot" data-gear="3">3</div>
+              <div class="gear-slot" data-gear="S">S</div>
+            </div>
+
+            <!-- Vehicle Chassis Interactive HUD -->
+            <div class="chassis-hud">
+              <div class="tpms-card fl">
+                <span class="wheel-label">FRONT L</span>
+                <span class="wheel-val" id="tpms-fl">2.3 bar</span>
+              </div>
+              
+              <div class="car-silhouette">
+                <svg class="car-svg" viewBox="0 0 160 300">
+                  <!-- Car Body Wireframe -->
+                  <path class="car-body" d="M40 50 Q80 35 120 50 L130 90 L135 180 L125 260 Q80 270 35 260 L25 180 L30 90 Z" />
+                  <path class="car-windshield" d="M48 95 Q80 85 112 95 L118 135 Q80 140 42 135 Z" />
+                  <path class="car-rear-window" d="M45 205 Q80 200 115 205 L118 235 Q80 240 42 235 Z" />
+                  <!-- 4 Wheels with rotation capability -->
+                  <rect class="wheel-rect wheel-fl" id="wheel-front-left" x="12" y="70" width="14" height="32" rx="4" />
+                  <rect class="wheel-rect wheel-fr" id="wheel-front-right" x="134" y="70" width="14" height="32" rx="4" />
+                  <rect class="wheel-rect" x="12" y="210" width="14" height="32" rx="4" />
+                  <rect class="wheel-rect" x="134" y="210" width="14" height="32" rx="4" />
+                  <!-- Headlamp Beams -->
+                  <polygon class="headlamp-beam" id="beam-left" points="35,45 15,5 55,5" />
+                  <polygon class="headlamp-beam" id="beam-right" points="125,45 105,5 145,5" />
+                </svg>
+                <div class="steering-overlay">
+                  <span class="steer-lbl">STEERING</span>
+                  <span class="steer-val" id="steering-val">0.0&deg;</span>
+                </div>
+              </div>
+
+              <div class="tpms-card fr">
+                <span class="wheel-label">FRONT R</span>
+                <span class="wheel-val" id="tpms-fr">2.3 bar</span>
+              </div>
+            </div>
+
+            <!-- Odometer & Trip Footer -->
+            <div class="cluster-card-footer">
+              <div class="stat-cell">
+                <span class="cell-label">ODOMETER</span>
+                <span class="cell-value" id="odo-val">14,250.4 km</span>
+              </div>
+              <div class="stat-cell">
+                <span class="cell-label">TRIP DISTANCE</span>
+                <span class="cell-value" id="trip-val">42.8 km</span>
+              </div>
+              <div class="stat-cell">
+                <span class="cell-label">SYSTEM CLOCK</span>
+                <span class="cell-value" id="sys-time">00:00:00</span>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <!-- Center Big Speed Display -->
-        <div class="speed-readout">
-          <div class="speed-num" id="speed-digital">0</div>
-          <div class="speed-unit">KM/H</div>
-        </div>
+          <!-- Right Column: Secondary Speed Arc & Energy Levels -->
+          <div class="card gauge-card speed-levels-card">
+            <div class="card-header">
+              <span class="card-title">ENERGY & FLUID TELEMETRY</span>
+              <span class="badge badge-green">HEALTHY</span>
+            </div>
 
-        <!-- Gear Selector Bar -->
-        <div class="gear-bar">
-          <div class="gear-item active" data-gear="P">P</div>
-          <div class="gear-item" data-gear="R">R</div>
-          <div class="gear-item" data-gear="N">N</div>
-          <div class="gear-item" data-gear="D">D</div>
-          <div class="gear-item" data-gear="1">1</div>
-          <div class="gear-item" data-gear="2">2</div>
-          <div class="gear-item" data-gear="3">3</div>
-          <div class="gear-item" data-gear="S">S</div>
-        </div>
+            <div class="gauge-display-wrapper">
+              <svg class="radial-svg" viewBox="0 0 300 300" id="speed-svg">
+                <defs>
+                  <linearGradient id="speed-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="var(--theme-accent)" />
+                    <stop offset="70%" stop-color="var(--theme-glow)" />
+                    <stop offset="100%" stop-color="#38bdf8" />
+                  </linearGradient>
+                </defs>
+                <circle class="gauge-track-bg" cx="150" cy="150" r="115" />
+                <circle class="gauge-val-arc" id="speed-arc" cx="150" cy="150" r="115" stroke="url(#speed-gradient)" filter="url(#gauge-glow)" />
+                <line class="gauge-needle-arm" id="speed-needle" x1="150" y1="150" x2="150" y2="48" />
+                <circle class="needle-hub" cx="150" cy="150" r="14" />
+              </svg>
+              <div class="gauge-center-readout">
+                <span class="unit-sub">VELOCITY</span>
+                <span class="mega-digit" id="speed-sub-digital">0</span>
+                <span class="unit-lbl">MAX 240 KM/H</span>
+              </div>
+            </div>
 
-        <!-- Odometer & Steering -->
-        <div class="cluster-bottom-stats">
-          <div class="stat-item">
-            <span class="stat-lbl">ODO</span>
-            <span class="stat-val" id="odo-val">14,250.4 km</span>
+            <!-- Energy / Levels Grid -->
+            <div class="resource-meters-grid">
+              <div class="resource-box">
+                <div class="resource-top">
+                  <span>COOLANT TEMP</span>
+                  <span class="resource-val" id="temp-val">85&deg;C</span>
+                </div>
+                <div class="progress-bar-rail">
+                  <div class="progress-bar-fill" id="temp-fill" style="width: 50%;"></div>
+                </div>
+              </div>
+
+              <div class="resource-box">
+                <div class="resource-top">
+                  <span>FUEL CAPACITY</span>
+                  <span class="resource-val" id="fuel-val">78%</span>
+                </div>
+                <div class="progress-bar-rail">
+                  <div class="progress-bar-fill accent-cyan" id="fuel-fill" style="width: 78%;"></div>
+                </div>
+              </div>
+
+              <div class="resource-box">
+                <div class="resource-top">
+                  <span>BATTERY SOC (HV)</span>
+                  <span class="resource-val" id="battery-val">88%</span>
+                </div>
+                <div class="progress-bar-rail">
+                  <div class="progress-bar-fill accent-emerald" id="battery-fill" style="width: 88%;"></div>
+                </div>
+              </div>
+
+              <div class="resource-box">
+                <div class="resource-top">
+                  <span>REGEN / BRAKE PWR</span>
+                  <span class="resource-val" id="regen-val">0.0 kW</span>
+                </div>
+                <div class="progress-bar-rail">
+                  <div class="progress-bar-fill accent-purple" id="regen-fill" style="width: 15%;"></div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="stat-item">
-            <span class="stat-lbl">STEERING</span>
-            <span class="stat-val" id="steering-val">0.0&deg;</span>
+
+        </div>
+      </section>
+
+      <!-- ================= TAB 2: SIGNAL OSCILLOSCOPE ================= -->
+      <section class="tab-content" id="tab-oscilloscope">
+        <div class="card oscilloscope-card">
+          <div class="card-header">
+            <div class="title-with-pill">
+              <span class="card-title">REAL-TIME SIGNAL OSCILLOSCOPE & WAVEFORM RECORDER</span>
+              <span class="badge badge-cyan">60 FPS HARDWARE ACCELERATED</span>
+            </div>
+            
+            <div class="oscilloscope-controls">
+              <div class="scope-legend">
+                <label class="legend-chip"><input type="checkbox" id="trace-rpm-chk" checked> <span class="dot dot-cyan"></span> RPM (0-8000)</label>
+                <label class="legend-chip"><input type="checkbox" id="trace-speed-chk" checked> <span class="dot dot-blue"></span> Speed (0-240)</label>
+                <label class="legend-chip"><input type="checkbox" id="trace-throttle-chk" checked> <span class="dot dot-orange"></span> Throttle (0-100%)</label>
+                <label class="legend-chip"><input type="checkbox" id="trace-temp-chk" checked> <span class="dot dot-coral"></span> Temp (0-150°C)</label>
+              </div>
+              <div class="scope-actions">
+                <button class="btn btn-sm" id="btn-scope-pause">Freeze Waveform</button>
+                <button class="btn btn-sm" id="btn-scope-clear">Clear Scope</button>
+                <select id="scope-timespan" class="select-dropdown-sm">
+                  <option value="10">10 Seconds Window</option>
+                  <option value="20" selected>20 Seconds Window</option>
+                  <option value="40">40 Seconds Window</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="canvas-container">
+            <canvas id="scopeCanvas" width="1280" height="420"></canvas>
+            <div class="canvas-cursor-tooltip" id="scopeTooltip">Hover waveform for signal values</div>
+          </div>
+
+          <div class="scope-footer-stats">
+            <div class="scope-stat-col">
+              <span class="lbl">PEAK RPM</span>
+              <span class="val cyan" id="scope-peak-rpm">0 RPM</span>
+            </div>
+            <div class="scope-stat-col">
+              <span class="lbl">MAX SPEED</span>
+              <span class="val blue" id="scope-max-speed">0 km/h</span>
+            </div>
+            <div class="scope-stat-col">
+              <span class="lbl">AVG THROTTLE</span>
+              <span class="val orange" id="scope-avg-throttle">0%</span>
+            </div>
+            <div class="scope-stat-col">
+              <span class="lbl">PEAK COOLANT TEMP</span>
+              <span class="val coral" id="scope-peak-temp">85°C</span>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- Right: Speedometer Arc & Diagnostics -->
-      <section class="gauge-card right-card">
-        <div class="gauge-wrapper">
-          <svg class="radial-gauge" viewBox="0 0 300 300" id="speed-svg">
-            <defs>
-              <linearGradient id="speed-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#00f0ff" />
-                <stop offset="60%" stop-color="#38bdf8" />
-                <stop offset="100%" stop-color="#818cf8" />
-              </linearGradient>
-            </defs>
-            <circle class="gauge-track" cx="150" cy="150" r="115" />
-            <circle class="gauge-value" id="speed-arc" cx="150" cy="150" r="115" stroke="url(#speed-grad)" filter="url(#glow-cyan)" />
-            <line class="gauge-needle" id="speed-needle" x1="150" y1="150" x2="150" y2="48" />
-            <circle class="needle-cap" cx="150" cy="150" r="12" />
-          </svg>
-          <div class="gauge-overlay">
-            <span class="gauge-title">SPEED LIMIT</span>
-            <div class="speed-ring-val" id="speed-sub-digital">0</div>
-            <span class="gauge-unit">MAX 240 KM/H</span>
-          </div>
-        </div>
-
-        <div class="levels-grid">
-          <!-- Coolant Temp -->
-          <div class="level-box">
-            <div class="level-lbl">
-              <span>COOLANT</span>
-              <span id="temp-val">85&deg;C</span>
+      <!-- ================= TAB 3: CAN BUS INSPECTOR ================= -->
+      <section class="tab-content" id="tab-inspector">
+        <div class="card inspector-workbench-card">
+          
+          <!-- Bus Telemetry Stats Header -->
+          <div class="inspector-summary-strip">
+            <div class="metric-brick">
+              <span class="brick-lbl">TOTAL FRAMES INGESTED</span>
+              <span class="brick-val" id="insp-total-frames">0</span>
             </div>
-            <div class="meter-bar">
-              <div class="meter-fill" id="temp-fill" style="width: 50%;"></div>
+            <div class="metric-brick">
+              <span class="brick-lbl">PACKET FREQUENCY</span>
+              <span class="brick-val cyan" id="insp-fps">0 fps</span>
+            </div>
+            <div class="metric-brick">
+              <span class="brick-lbl">ESTIMATED BUS LOAD</span>
+              <span class="brick-val green" id="insp-bus-load">12.4%</span>
+            </div>
+            <div class="metric-brick">
+              <span class="brick-lbl">ACTIVE ARBITRATION IDS</span>
+              <span class="brick-val amber" id="insp-active-ids">3 IDs</span>
             </div>
           </div>
 
-          <!-- Oil Pressure -->
-          <div class="level-box">
-            <div class="level-lbl">
-              <span>OIL PRESS</span>
-              <span id="oil-val">3.5 bar</span>
+          <div class="inspector-toolbar">
+            <div class="toolbar-left">
+              <div class="search-box">
+                <input type="text" id="inspector-search" placeholder="Search Hex Payload, CAN ID, or Signal Name..." />
+              </div>
+              <select id="filter-can-id" class="select-dropdown">
+                <option value="ALL">All Arbitration IDs</option>
+                <option value="0x100">0x100 — Engine_Data (ECU_ENGINE)</option>
+                <option value="0x200">0x200 — Vehicle_Status (ECU_BODY)</option>
+                <option value="0x300">0x300 — Diagnostics_Alerts (ECU_DIAG)</option>
+              </select>
             </div>
-            <div class="meter-bar">
-              <div class="meter-fill" id="oil-fill" style="width: 35%;"></div>
+
+            <div class="toolbar-right">
+              <button class="btn btn-secondary" id="btn-export-csv">💾 Export Log to CSV</button>
+              <button class="btn btn-secondary" id="btn-table-clear">Clear Table</button>
+              <button class="btn btn-primary" id="btn-table-pause">⏸ Pause Feed</button>
             </div>
           </div>
 
-          <!-- Fuel -->
-          <div class="level-box">
-            <div class="level-lbl">
-              <span>FUEL</span>
-              <span id="fuel-val">78%</span>
-            </div>
-            <div class="meter-bar">
-              <div class="meter-fill" id="fuel-fill" style="width: 78%;"></div>
-            </div>
-          </div>
-
-          <!-- Battery SOC -->
-          <div class="level-box">
-            <div class="level-lbl">
-              <span>BATTERY</span>
-              <span id="battery-val">88%</span>
-            </div>
-            <div class="meter-bar">
-              <div class="meter-fill" id="battery-fill" style="width: 88%;"></div>
-            </div>
+          <!-- Wireshark-Style Tabular Stream -->
+          <div class="inspector-table-wrapper">
+            <table class="can-stream-table">
+              <thead>
+                <tr>
+                  <th width="12%">TIMESTAMP</th>
+                  <th width="10%">CAN ID</th>
+                  <th width="16%">MESSAGE NAME</th>
+                  <th width="8%">DLC</th>
+                  <th width="26%">HEX PAYLOAD (BYTES 0..7)</th>
+                  <th width="28%">DECODED PHYSICAL SIGNALS</th>
+                </tr>
+              </thead>
+              <tbody id="can-inspector-tbody">
+                <tr class="empty-feed-row">
+                  <td colspan="6">Awaiting incoming CAN frames from vcan0 transport layer...</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
+
+      <!-- ================= TAB 4: ECU INJECTOR & FAULT INJECTION ================= -->
+      <section class="tab-content" id="tab-injector">
+        <div class="injector-workbench-grid">
+          
+          <!-- Powertrain & Chassis Signal Overrides -->
+          <div class="card injector-card">
+            <div class="card-header">
+              <span class="card-title">ECU SIGNAL OVERRIDE PANEL (VIRTUAL TRANSMITTER)</span>
+              <span class="badge badge-amber">LIVE BUS INJECTION</span>
+            </div>
+            
+            <div class="controls-form">
+              <!-- Engine RPM Slider -->
+              <div class="slider-control">
+                <div class="slider-header">
+                  <label for="inj-rpm">Engine Speed (RPM)</label>
+                  <span class="slider-numeric-val mono-val" id="inj-rpm-display">2500 RPM</span>
+                </div>
+                <input type="range" id="inj-rpm" min="0" max="8000" step="50" value="2500">
+                <div class="quick-presets">
+                  <button class="preset-btn" data-input="inj-rpm" data-val="0">Engine Off (0)</button>
+                  <button class="preset-btn" data-input="inj-rpm" data-val="850">Idle (850)</button>
+                  <button class="preset-btn" data-input="inj-rpm" data-val="2400">Cruise (2400)</button>
+                  <button class="preset-btn" data-input="inj-rpm" data-val="6500">Redline (6500)</button>
+                </div>
+              </div>
+
+              <!-- Vehicle Speed Slider -->
+              <div class="slider-control">
+                <div class="slider-header">
+                  <label for="inj-speed">Vehicle Speed (km/h)</label>
+                  <span class="slider-numeric-val mono-val" id="inj-speed-display">60 km/h</span>
+                </div>
+                <input type="range" id="inj-speed" min="0" max="240" step="1" value="60">
+              </div>
+
+              <!-- Throttle Position Slider -->
+              <div class="slider-control">
+                <div class="slider-header">
+                  <label for="inj-throttle">Throttle Position (%)</label>
+                  <span class="slider-numeric-val mono-val" id="inj-throttle-display">25%</span>
+                </div>
+                <input type="range" id="inj-throttle" min="0" max="100" step="1" value="25">
+              </div>
+
+              <!-- Coolant Temp Slider -->
+              <div class="slider-control">
+                <div class="slider-header">
+                  <label for="inj-temp">Coolant Temperature (&deg;C)</label>
+                  <span class="slider-numeric-val mono-val" id="inj-temp-display">85&deg;C</span>
+                </div>
+                <input type="range" id="inj-temp" min="40" max="130" step="1" value="85">
+              </div>
+
+              <!-- Gear Selection Buttons -->
+              <div class="group-control">
+                <label>Transmission Gear Selection</label>
+                <div class="radio-button-rack" id="inj-gear-selector">
+                  <button class="radio-btn" data-gear-val="0">P (Park)</button>
+                  <button class="radio-btn" data-gear-val="1">R (Reverse)</button>
+                  <button class="radio-btn" data-gear-val="2">N (Neutral)</button>
+                  <button class="radio-btn active" data-gear-val="3">D (Drive)</button>
+                  <button class="radio-btn" data-gear-val="7">S (Sport)</button>
+                </div>
+              </div>
+
+              <!-- Turn Signal Selector -->
+              <div class="group-control">
+                <label>Turn Signals & Hazard</label>
+                <div class="radio-button-rack" id="inj-turn-selector">
+                  <button class="radio-btn active" data-turn-val="0">OFF</button>
+                  <button class="radio-btn" data-turn-val="1">LEFT</button>
+                  <button class="radio-btn" data-turn-val="2">RIGHT</button>
+                  <button class="radio-btn" data-turn-val="3">HAZARD</button>
+                </div>
+              </div>
+
+              <button class="btn btn-primary btn-block" id="btn-transmit-powertrain">
+                ⚡ Transmit Overridden Frames to CAN Bus (0x100 & 0x200)
+              </button>
+            </div>
+          </div>
+
+          <!-- Fault Injection & Custom Raw Frame Transmitter -->
+          <div class="card injector-card">
+            <div class="card-header">
+              <span class="card-title">FAULT INJECTION & ARBITRARY FRAME TRANSMITTER</span>
+              <span class="badge badge-purple">SECURITY & DIAGNOSTICS</span>
+            </div>
+
+            <div class="fault-injection-section">
+              <span class="section-subtitle">DTC & Telltale Fault Triggers (0x300 Diagnostics_Alerts)</span>
+              <div class="fault-grid">
+                <button class="fault-toggle-btn" id="fault-btn-check-engine">
+                  <span class="fault-icon">⚠️</span>
+                  <span class="fault-name">Check Engine (MIL)</span>
+                  <span class="fault-state">INACTIVE</span>
+                </button>
+                <button class="fault-toggle-btn" id="fault-btn-tpms">
+                  <span class="fault-icon">🚗</span>
+                  <span class="fault-name">Tire Pressure (TPMS)</span>
+                  <span class="fault-state">INACTIVE</span>
+                </button>
+                <button class="fault-toggle-btn" id="fault-btn-battery">
+                  <span class="fault-icon">⚡</span>
+                  <span class="fault-name">Alternator / Battery</span>
+                  <span class="fault-state">INACTIVE</span>
+                </button>
+                <button class="fault-toggle-btn" id="fault-btn-abs">
+                  <span class="fault-icon">🛑</span>
+                  <span class="fault-name">ABS Hydraulic Fault</span>
+                  <span class="fault-state">INACTIVE</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="raw-frame-injection-section">
+              <span class="section-subtitle">Arbitrary Hex Frame Transmitter (Raw SocketCAN Frame)</span>
+              <div class="raw-form">
+                <div class="form-row">
+                  <div class="form-field flex-1">
+                    <label>Arbitration CAN ID (Hex or Dec)</label>
+                    <input type="text" id="raw-can-id" class="mono-input" placeholder="e.g. 0x100 or 256" value="0x100" />
+                  </div>
+                  <div class="form-field flex-2">
+                    <label>Hex Payload (Up to 8 Bytes / 16 Hex Characters)</label>
+                    <input type="text" id="raw-can-payload" class="mono-input" placeholder="e.g. 12 34 56 78 9A BC DE F0" value="30 2B 00 00 20 80 44 00" />
+                  </div>
+                </div>
+                
+                <div class="raw-action-row">
+                  <button class="btn btn-primary" id="btn-send-raw-frame">Transmit Raw CAN Frame</button>
+                  <span class="transmission-status-tag" id="raw-send-status">Ready</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Terminal Output Log -->
+            <div class="injector-terminal">
+              <div class="terminal-header">TRANSMISSION LOG CONSOLE</div>
+              <div class="terminal-body" id="injector-terminal-log">
+                <div class="term-line info">[SYSTEM] ECU Injection Module Initialized. Ready for bus packet injection.</div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= TAB 5: DBC DATA CATALOG ================= -->
+      <section class="tab-content" id="tab-dbc">
+        <div class="card dbc-explorer-card">
+          <div class="card-header">
+            <div class="title-with-pill">
+              <span class="card-title">CAN DATABASE (DBC) SPECIFICATION EXPLORER</span>
+              <span class="badge badge-blue">vehicle_base.dbc</span>
+            </div>
+            <div class="dbc-header-actions">
+              <input type="text" id="dbc-search-input" placeholder="Filter message or signal name..." class="search-input-sm" />
+            </div>
+          </div>
+
+          <div class="dbc-catalog-container" id="dbc-catalog-container">
+            <!-- Dynamically populated from backend DBC introspection -->
+            <div class="dbc-loading-state">Querying active DBC database matrix from backend...</div>
+          </div>
+        </div>
+      </section>
+
     </main>
-
-    <!-- Raw CAN Bus Inspector -->
-    <section class="inspector-card">
-      <div class="inspector-header">
-        <div class="inspector-title">
-          <span class="pulsing-led"></span>
-          <h2>LIVE CAN BUS FRAME INSPECTOR</h2>
-        </div>
-        <div class="inspector-controls">
-          <button class="btn" id="btn-pause">PAUSE STREAM</button>
-          <button class="btn" id="btn-clear">CLEAR LOG</button>
-          <select id="filter-id" class="select-dropdown">
-            <option value="ALL">All CAN IDs</option>
-            <option value="0x100">0x100 - Engine_Data</option>
-            <option value="0x200">0x200 - Vehicle_Status</option>
-            <option value="0x300">0x300 - Diagnostics_Alerts</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="table-container">
-        <table class="can-table">
-          <thead>
-            <tr>
-              <th width="15%">TIMESTAMP</th>
-              <th width="12%">CAN ID</th>
-              <th width="20%">MESSAGE NAME</th>
-              <th width="25%">RAW HEX PAYLOAD</th>
-              <th width="28%">DECODED SIGNALS</th>
-            </tr>
-          </thead>
-          <tbody id="can-tbody">
-            <tr class="empty-row"><td colspan="5">Awaiting CAN traffic from vcan0...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
   </div>
 
   <script src="app.js"></script>
