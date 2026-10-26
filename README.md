@@ -7,79 +7,104 @@
 [![Workbench](https://img.shields.io/badge/Workbench-v2.4%20PRO-8b5cf6?style=flat-square)](frontend_dashboard/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-f59e0b?style=flat-square)](LICENSE)
 
-OpenTwin is a 100% software-based automotive network emulator designed for developing and testing digital instrument clusters, diagnostic routines, and ECU cybersecurity logic without requiring physical vehicle hardware or CAN transceivers.
+OpenTwin is a 100% software-based automotive network emulator designed for developing and testing digital instrument clusters, diagnostic routines, and ECU cybersecurity logic without physical vehicle hardware or CAN transceivers.
 
 ---
 
-## 1. Project Overview & Node Architecture
+## 1. Project Architecture & Codebase Data Flow
 
-OpenTwin operates as a **"Ghost Vehicle"** in RAM. The system is architected as a node-based reactive telemetry pipeline (inspired by node workflows like [xyflow/react-flow](https://github.com/xyflow/xyflow)), connecting input logs, virtual bus transport, DBC decoding, bidirectional WebSocket telemetry, and an interactive multi-view cluster workbench.
-
-### Node-Based System Flowchart & Currently Worked Area
+The following interactive architecture diagram illustrates the end-to-end data pipeline from log generation and virtual bus transport to backend signal decoding and the **Active Frontend Workbench Suite**.
 
 ```mermaid
-flowchart TD
+flowchart LR
+    %% =========================================================================
+    %% ARCHIFY CODEBASE ARCHITECTURE & DATA FLOW
+    %% =========================================================================
+
     %% Node Styling Definitions
-    classDef inputNode fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#e0e7ff;
-    classDef busNode fill:#0c2a4a,stroke:#38bdf8,stroke-width:2px,color:#e0f2fe;
-    classDef coreNode fill:#2e1065,stroke:#c084fc,stroke-width:2px,color:#f5f3ff;
-    classDef activeWork fill:#042f2e,stroke:#14b8a6,stroke-width:3px,color:#ccfbf1;
-    classDef focusNode fill:#134e4a,stroke:#2dd4bf,stroke-width:2px,color:#f0fdfa,font-weight:bold;
+    classDef fileNode fill:#0b1120,stroke:#38bdf8,stroke-width:1.8px,color:#e2e8f0;
+    classDef dbcNode fill:#1e1b4b,stroke:#818cf8,stroke-width:1.8px,color:#e0e7ff;
+    classDef transportNode fill:#022c22,stroke:#10b981,stroke-width:2px,color:#a7f3d0;
+    classDef backendNode fill:#1c1917,stroke:#f59e0b,stroke-width:2px,color:#fef3c7;
+    classDef activeWorkspace fill:#042f2e,stroke:#14b8a6,stroke-width:2.5px,color:#ccfbf1;
+    classDef testNode fill:#2e1065,stroke:#c084fc,stroke-width:1.8px,color:#f5f3ff;
 
-    subgraph INGESTION [" Layer 1: Data Ingestion & Replay "]
-        A1["📁 candump Drive Logs<br/><code>data_logs/sample_drive.log</code>"]:::inputNode
-        A2["⚙️ Procedural Generator<br/><code>generate_logs.py</code>"]:::inputNode
-        A3["🕹️ canplayer / Internal Replayer<br/>(Loop & Speed Controls)"]:::inputNode
-        A1 --> A3
-        A2 --> A1
-    end
-
-    subgraph TRANSPORT [" Layer 2: Transport & Virtual Network "]
-        B1["🔌 Linux SocketCAN (vcan0)<br/><code>scripts/setup_vcan.sh</code>"]:::busNode
-        B2["🔄 Cross-Platform Virtual Loopback<br/>(Windows & Linux Standalone)"]:::busNode
-        A3 --> B1
-        A3 --> B2
-    end
-
-    subgraph CORE [" Layer 3: Decoder & Telemetry Backend "]
-        C1["📖 CAN Database Matrix<br/><code>vehicle_base.dbc</code>"]:::coreNode
-        C2["🧠 python-can + cantools Decoder<br/><code>emulator_core/decoder.py</code>"]:::coreNode
-        C3["⚡ Async WebSocket Server @ 30Hz<br/><code>emulator_core/server.py</code>"]:::coreNode
-        B1 --> C2
-        B2 --> C2
-        C1 --> C2
-        C2 --> C3
-    end
-
-    subgraph WORKBENCH [" 🚀 CURRENTLY WORKED AREA: Telemetry Workbench v2.4 PRO "]
+    %% -------------------------------------------------------------------------
+    %% SUBGRAPH 1: DATA SOURCES & NETWORK SCRIPTS
+    %% -------------------------------------------------------------------------
+    subgraph SOURCES [" 📁 Data Sources & Network Layer "]
         direction TB
-        D0["🌐 Web Interface Hub<br/><code>frontend_dashboard/index.html</code>"]:::focusNode
+        LOG_GEN["🐍 <code>data_logs/generate_logs.py</code><br/>Procedural Drive Cycle Engine"]:::fileNode
+        LOG_FILE[("📄 <code>data_logs/sample_drive.log</code><br/>5,100+ Raw candump Frames")]:::fileNode
+        VCAN_SCRIPT["📜 <code>scripts/setup_vcan.sh</code><br/>SocketCAN Kernel Setup (vcan0)"]:::fileNode
+        REPLAY_SCRIPT["📜 <code>scripts/replay_log.sh</code><br/>canplayer Traffic Injector"]:::fileNode
         
-        D1["🚀 Cockpit Cluster HUD<br/>• Swept Tachometer & Velocity<br/>• Rotating Wheel Chassis HUD<br/>• 4-Wheel TPMS & Telltales"]:::activeWork
-        
-        D2["📈 60 FPS Oscilloscope<br/>• Rolling Multi-Signal Waveforms<br/>• Freeze, Time-Window & Zoom<br/>• Peak & Average Stats"]:::activeWork
-        
-        D3["🔍 CAN Bus Inspector<br/>• Wireshark-Style Byte Highlight<br/>• Real-Time ID & Text Filters<br/>• 💾 CSV Log Export"]:::activeWork
-        
-        D4["🕹️ ECU Injector & Faults<br/>• Manual Signal Override Sliders<br/>• DTC Fault Triggers (MIL, TPMS)<br/>• Arbitrary Frame Injector"]:::activeWork
-        
-        D5["🎨 Ambient Drive Themes<br/>COMFORT | SPORT | ECO | CYBER"]:::activeWork
-
-        D0 --> D1
-        D0 --> D2
-        D0 --> D3
-        D0 --> D4
-        D0 --> D5
+        LOG_GEN -- "Generates timestamped frames" --> LOG_FILE
+        VCAN_SCRIPT -- "Initializes interface" --> VCAN_BUS
+        LOG_FILE -- "Ingested via canplayer" --> REPLAY_SCRIPT
     end
 
-    %% Bidirectional Connection
-    C3 <== "ws://localhost:8080/ws (Telemetry Stream & Injection Packets)" ==> D0
+    %% -------------------------------------------------------------------------
+    %% SUBGRAPH 2: TRANSPORT & VIRTUAL CAN BUS
+    %% -------------------------------------------------------------------------
+    subgraph TRANSPORT [" 🔌 Transport Layer (RAM Loopback) "]
+        VCAN_BUS["🌐 <b>Linux SocketCAN (vcan0)</b><br/>Virtual CAN Bus Device in Kernel"]:::transportNode
+        REPLAY_SCRIPT == "canplayer -I sample_drive.log vcan0=can0" ==> VCAN_BUS
+    end
 
-    %% Active Workspace Callout Node
-    class WORKBENCH activeWork;
+    %% -------------------------------------------------------------------------
+    %% SUBGRAPH 3: BACKEND DECODER & WEBSOCKET ENGINE
+    %% -------------------------------------------------------------------------
+    subgraph BACKEND [" ⚙️ Layer 3: Backend Decoder & Streamer "]
+        direction TB
+        DBC_DEF[("📖 <code>dbc_definitions/vehicle_base.dbc</code><br/>CAN Matrix (0x100, 0x200, 0x300)")]:::dbcNode
+        PY_DECODER["🧠 <code>emulator_core/decoder.py</code><br/>CANDecoder (cantools unpack)"]:::backendNode
+        PY_SERVER["⚡ <code>emulator_core/server.py</code><br/>Async WebSocket & HTTP Server"]:::backendNode
+
+        VCAN_BUS == "Raw Hex CAN Frames (50Hz)" ==> PY_DECODER
+        DBC_DEF -. "Loads bit layout, scale & offsets" .-> PY_DECODER
+        PY_DECODER -- "Physical metrics: RPM, Speed, Temp" --> PY_SERVER
+    end
+
+    %% -------------------------------------------------------------------------
+    %% SUBGRAPH 4: ACTIVE WORKSPACE (FRONTEND WORKBENCH)
+    %% -------------------------------------------------------------------------
+    subgraph FRONTEND [" 🚀 CURRENTLY WORKED AREA: Telemetry Workbench v2.4 PRO "]
+        direction TB
+        UI_HUB["🌐 <code>frontend_dashboard/index.html</code><br/>Multi-View Glassmorphic Workbench"]:::activeWorkspace
+        UI_LOGIC["⚡ <code>frontend_dashboard/app.js</code><br/>WebSocket Client & 60fps Dispatcher"]:::activeWorkspace
+        UI_STYLE["🎨 <code>frontend_dashboard/style.css</code><br/>Theme Engine (Comfort, Sport, Eco, Cyber)"]:::activeWorkspace
+
+        W1["🚀 Cockpit Cluster HUD<br/>• Radial Swept Tachometer & Velocity<br/>• Rotating Wheel Chassis HUD<br/>• 4-Wheel TPMS & Alert Rack"]:::activeWorkspace
+        W2["📈 60 FPS Signal Oscilloscope<br/>• Multi-Trace Rolling Waveform Plots<br/>• Freeze, Time-Window & Peak Analytics"]:::activeWorkspace
+        W3["🔍 CAN Bus Frame Inspector<br/>• Wireshark-Style Byte Highlight<br/>• Live ID Filters & 💾 CSV Export"]:::activeWorkspace
+        W4["🕹️ ECU Injector & Fault Panel<br/>• Powertrain Overrides & Presets<br/>• MIL, TPMS, Battery, ABS Faults<br/>• Arbitrary Hex Frame Transmitter"]:::activeWorkspace
+        W5["📚 DBC Catalog Browser<br/>• Dynamic Message/Signal Matrix Search"]:::activeWorkspace
+
+        UI_HUB --- UI_LOGIC
+        UI_HUB --- UI_STYLE
+        UI_LOGIC --> W1
+        UI_LOGIC --> W2
+        UI_LOGIC --> W3
+        UI_LOGIC --> W4
+        UI_LOGIC --> W5
+    end
+
+    %% Bidirectional Telemetry Stream & Injection Feedback Loop
+    PY_SERVER <== "ws://localhost:8080/ws<br/>[JSON Telemetry Broadcast @ 30Hz]" ==> UI_LOGIC
+    W4 -. "Bidirectional Injection: 0x100#... / 0x300#...<br/>[inject_frame action]" .-> PY_SERVER
+    PY_SERVER -. "Forwards Injected Frames" .-> VCAN_BUS
+
+    %% -------------------------------------------------------------------------
+    %% SUBGRAPH 5: AUTOMATED TEST PIPELINE
+    %% -------------------------------------------------------------------------
+    subgraph TESTS [" 🧪 Continuous Verification "]
+        TEST_SUITE["🧪 <code>tests/test_pipeline.py</code><br/>6 Unit & Integration Tests (100% Pass)"]:::testNode
+        TEST_SUITE -. "Validates DBC, frames, and WS streaming" .-> BACKEND
+    end
 ```
 
-> **Current Sprint Focus**: Development is focused on the **Frontend Workbench (`frontend_dashboard/`)** with live 60 FPS canvas waveform plotting, interactive chassis steering kinematics, bidirectional frame injection from the browser, and CSV export.
+> ⚡ **Active Workspace Notice**: Current development is focused on the **Frontend Workbench Suite (`frontend_dashboard/`)** featuring real-time 60 FPS hardware-accelerated waveform graphing, interactive vehicle steering kinematics, bidirectional CAN injection, and CSV export.
 
 ---
 
