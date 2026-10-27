@@ -1,6 +1,6 @@
 /**
  * OpenTwin: 3D Vehicle Physics Engine
- * Phase 2.1 & 2.2 — Rapier3D WASM & 4-Wheel Raycast Suspension Dynamics
+ * Phase 2.1, 2.2 & 2.3 — Rapier3D WASM, Raycast Suspension & Ackermann Steering
  */
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
@@ -20,21 +20,28 @@ export class PhysicsEngine {
     this.vehicleMass = 1450; // kg
     this.initialY = 0.75;    // Initial drop height
 
-    // Suspension specifications
-    this.wheelbaseHalf = 1.3;
-    this.trackHalf = 0.8;
+    // Geometry parameters (Meters)
+    this.wheelbase = 2.6;
+    this.trackWidth = 1.6;
+    this.wheelbaseHalf = this.wheelbase / 2; // 1.3m
+    this.trackHalf = this.trackWidth / 2;    // 0.8m
     this.mountY = 0.42;
     this.wheelRadius = 0.34;
     this.suspensionRestLength = 0.48; // meters
     this.springStiffness = 34000;     // N/m
     this.springDamping = 4400;        // N*s/m
 
+    // Steering state (Ackermann)
+    this.currentSteer = 0.0;          // radians
+    this.maxSteerAngle = 0.56;        // ~32 degrees
+    this.steerAngles = { left: 0.0, right: 0.0 };
+
     // 4 Wheels: FL, FR, RL, RR
     this.wheels = [
-      { id: 'FL', localPos: new THREE.Vector3(-this.trackHalf, this.mountY, this.wheelbaseHalf), prevComp: 0, comp: 0, contact: false, visualY: this.wheelRadius },
-      { id: 'FR', localPos: new THREE.Vector3(this.trackHalf, this.mountY, this.wheelbaseHalf), prevComp: 0, comp: 0, contact: false, visualY: this.wheelRadius },
-      { id: 'RL', localPos: new THREE.Vector3(-this.trackHalf, this.mountY, -this.wheelbaseHalf), prevComp: 0, comp: 0, contact: false, visualY: this.wheelRadius },
-      { id: 'RR', localPos: new THREE.Vector3(this.trackHalf, this.mountY, -this.wheelbaseHalf), prevComp: 0, comp: 0, contact: false, visualY: this.wheelRadius }
+      { id: 'FL', isFront: true,  localPos: new THREE.Vector3(-this.trackHalf, this.mountY, this.wheelbaseHalf), prevComp: 0, comp: 0, contact: false, visualY: this.wheelRadius, steerAngle: 0.0 },
+      { id: 'FR', isFront: true,  localPos: new THREE.Vector3(this.trackHalf, this.mountY, this.wheelbaseHalf), prevComp: 0, comp: 0, contact: false, visualY: this.wheelRadius, steerAngle: 0.0 },
+      { id: 'RL', isFront: false, localPos: new THREE.Vector3(-this.trackHalf, this.mountY, -this.wheelbaseHalf), prevComp: 0, comp: 0, contact: false, visualY: this.wheelRadius, steerAngle: 0.0 },
+      { id: 'RR', isFront: false, localPos: new THREE.Vector3(this.trackHalf, this.mountY, -this.wheelbaseHalf), prevComp: 0, comp: 0, contact: false, visualY: this.wheelRadius, steerAngle: 0.0 }
     ];
   }
 
@@ -63,7 +70,7 @@ export class PhysicsEngine {
         .setCcdEnabled(true);
       this.chassisBody = this.world.createRigidBody(chassisBodyDesc);
 
-      // Chassis Main Collider Box (elevated slightly above ground level for suspension clearance)
+      // Chassis Main Collider Box
       const chassisColliderDesc = RAPIER.ColliderDesc.cuboid(0.9, 0.28, 2.1)
         .setTranslation(0.0, 0.2, 0.0)
         .setMass(this.vehicleMass)
@@ -80,9 +87,53 @@ export class PhysicsEngine {
         badge.className = 'badge badge-green';
       }
 
-      console.log("[Physics] Rapier3D WASM physics world & 4-wheel raycast suspension initialized successfully.");
+      console.log("[Physics] Rapier3D WASM, suspension & Ackermann geometry initialized successfully.");
     } catch (err) {
       console.error("[Physics] Error loading Rapier3D WASM physics:", err);
+    }
+  }
+
+  computeAckermann(steerAngle) {
+    if (Math.abs(steerAngle) < 0.0005) {
+      return { left: 0.0, right: 0.0 };
+    }
+
+    const L = this.wheelbase;
+    const W = this.trackWidth;
+    const absAngle = Math.abs(steerAngle);
+    const turningRadius = L / Math.tan(absAngle);
+
+    // Ackermann formula: inner wheel turns sharper than outer wheel
+    const innerAngle = Math.atan(L / (turningRadius - W / 2));
+    const outerAngle = Math.atan(L / (turningRadius + W / 2));
+
+    if (steerAngle > 0) {
+      // Right turn: right wheel is inner, left wheel is outer
+      return { left: outerAngle, right: innerAngle };
+    } else {
+      // Left turn: left wheel is inner, right wheel is outer
+      return { left: -innerAngle, right: -outerAngle };
+    }
+  }
+
+  setSteering(targetAngle) {
+    this.currentSteer = THREE.MathUtils.clamp(targetAngle, -this.maxSteerAngle, this.maxSteerAngle);
+    this.steerAngles = this.computeAckermann(this.currentSteer);
+
+    this.wheels[0].steerAngle = this.steerAngles.left;
+    this.wheels[1].steerAngle = this.steerAngles.right;
+    this.wheels[2].steerAngle = 0.0;
+    this.wheels[3].steerAngle = 0.0;
+
+    if (this.vehicleRig) {
+      this.vehicleRig.setSteering(this.steerAngles.left, this.steerAngles.right);
+    }
+
+    // Update Telemetry HUD steer value
+    const hudSteer = document.getElementById('hud-3d-steer');
+    if (hudSteer) {
+      const deg = (this.currentSteer * 180 / Math.PI).toFixed(1);
+      hudSteer.innerText = `${deg}°`;
     }
   }
 
