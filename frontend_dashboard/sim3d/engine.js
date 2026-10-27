@@ -1,6 +1,7 @@
 /**
  * OpenTwin: 3D Vehicle Simulation & Digital Twin Engine
- * Phase 1 & Phase 2.1 — Viewport, Camera, Environment, PBR Rigged Vehicle, Rapier3D Physics
+ * Phases 1 & 2 — Viewport, Camera, Environment, PBR Rigged Vehicle,
+ * Rapier3D WASM Physics, Raycast Suspension, Ackermann & Pacejka Controls
  */
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
@@ -8,6 +9,7 @@ import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/exampl
 import { EnvironmentManager } from './environment.js';
 import { VehicleRig } from './vehicle.js';
 import { PhysicsEngine } from './physics.js';
+import { InputController } from './controls.js';
 
 export class Sim3DEngine {
   constructor(containerId) {
@@ -24,6 +26,7 @@ export class Sim3DEngine {
     this.environment = null;
     this.vehicleRig = null;
     this.physics = null;
+    this.controls = null;
     this.cameraMode = 'chase'; // 'chase' | 'orbit' | 'cockpit'
 
     this.vehicleGroup = new THREE.Group();
@@ -36,7 +39,7 @@ export class Sim3DEngine {
     this.cockpitOffset = new THREE.Vector3(-0.35, 1.15, 0.2); // Left-hand drive driver position
     this.cockpitLookAtOffset = new THREE.Vector3(-0.35, 1.1, 15.0);
 
-    // Callbacks for physics and telemetry
+    // Callbacks for external telemetry and bus synchronization
     this.onUpdateCallbacks = [];
 
     this.init();
@@ -86,19 +89,25 @@ export class Sim3DEngine {
     this.vehicleRig = new VehicleRig(this.scene);
     this.vehicleGroup = this.vehicleRig.root;
 
-    // 7. Rapier3D Physics Engine (Phase 2.1)
+    // 7. Keyboard Driving Input Controller (Phase 2.4)
+    this.controls = new InputController();
+    this.controls.onReset = () => {
+      if (this.physics) this.physics.resetPosition();
+    };
+
+    // 8. Rapier3D Physics Engine (Phase 2)
     this.physics = new PhysicsEngine(this.vehicleRig);
     await this.physics.init();
 
-    // 8. Handle Viewport Resizing
+    // 9. Handle Viewport Resizing
     this.setupResizeObserver();
 
-    // 9. Start Render Loop
+    // 10. Start Render Loop
     this.isInitialized = true;
     this.animate = this.animate.bind(this);
     requestAnimationFrame(this.animate);
 
-    console.log("[Sim3D] Viewport scaffold, environment, vehicle rig & physics initialized successfully.");
+    console.log("[Sim3D] Complete 3D Digital Twin simulation engine initialized successfully.");
   }
 
   setupResizeObserver() {
@@ -135,11 +144,9 @@ export class Sim3DEngine {
     if (!this.vehicleGroup) return;
 
     if (this.cameraMode === 'chase') {
-      // Calculate ideal position based on vehicle orientation
       const idealPosition = this.chaseOffset.clone().applyQuaternion(this.vehicleGroup.quaternion).add(this.vehicleGroup.position);
       const idealLookAt = this.chaseLookAtOffset.clone().applyQuaternion(this.vehicleGroup.quaternion).add(this.vehicleGroup.position);
 
-      // Smooth camera interpolation
       const t = 1.0 - Math.pow(0.001, delta);
       this.camera.position.lerp(idealPosition, t);
       this.camera.lookAt(idealLookAt);
@@ -160,9 +167,14 @@ export class Sim3DEngine {
     requestAnimationFrame(this.animate);
     const delta = Math.min(this.clock.getDelta(), 0.1);
 
-    // Step Physics Simulation (Phase 2.1)
+    // Update Input State (Phase 2.4)
+    if (this.controls) {
+      this.controls.update(delta);
+    }
+
+    // Step Physics Simulation (Phase 2)
     if (this.physics && this.physics.isReady) {
-      this.physics.step(delta);
+      this.physics.step(delta, this.controls);
     }
 
     // Follow vehicle with directional sun shadow frustum
@@ -170,7 +182,7 @@ export class Sim3DEngine {
       this.environment.update(this.vehicleGroup.position);
     }
 
-    // Execute user registered update loops (Inputs, custom animations)
+    // Execute user registered update loops (Custom callbacks)
     for (const cb of this.onUpdateCallbacks) {
       cb(delta);
     }

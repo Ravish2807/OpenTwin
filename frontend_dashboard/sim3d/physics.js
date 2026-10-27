@@ -1,6 +1,7 @@
 /**
  * OpenTwin: 3D Vehicle Physics Engine
- * Phase 2.1, 2.2 & 2.3 — Rapier3D WASM, Raycast Suspension & Ackermann Steering
+ * Phase 2 — Complete Physics Simulation: Rapier3D WASM, Raycast Suspension,
+ * Ackermann Steering, Pacejka 'Magic Formula' Tire Model & Powertrain Dynamics
  */
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
@@ -36,12 +37,27 @@ export class PhysicsEngine {
     this.maxSteerAngle = 0.56;        // ~32 degrees
     this.steerAngles = { left: 0.0, right: 0.0 };
 
+    // Powertrain & Transmission state
+    this.engineRpm = 850.0;
+    this.gear = 1;
+    this.gearRatios = [3.8, 2.35, 1.65, 1.22, 0.96, 0.78];
+    this.finalDrive = 3.42;
+    this.maxTorque = 480.0; // Nm (Sports car twin-turbo V6 / electric hybrid)
+    this.forwardSpeedKmh = 0.0;
+    this.isReversing = false;
+
+    // Pacejka 'Magic Formula' standard tire coefficients (Dry asphalt)
+    this.pacejkaB = 10.0;   // Stiffness factor
+    this.pacejkaC = 1.65;   // Shape factor
+    this.pacejkaD = 1.05;   // Peak friction coefficient (mu)
+    this.pacejkaE = -0.5;   // Curvature factor
+
     // 4 Wheels: FL, FR, RL, RR
     this.wheels = [
-      { id: 'FL', isFront: true,  localPos: new THREE.Vector3(-this.trackHalf, this.mountY, this.wheelbaseHalf), prevComp: 0, comp: 0, contact: false, visualY: this.wheelRadius, steerAngle: 0.0 },
-      { id: 'FR', isFront: true,  localPos: new THREE.Vector3(this.trackHalf, this.mountY, this.wheelbaseHalf), prevComp: 0, comp: 0, contact: false, visualY: this.wheelRadius, steerAngle: 0.0 },
-      { id: 'RL', isFront: false, localPos: new THREE.Vector3(-this.trackHalf, this.mountY, -this.wheelbaseHalf), prevComp: 0, comp: 0, contact: false, visualY: this.wheelRadius, steerAngle: 0.0 },
-      { id: 'RR', isFront: false, localPos: new THREE.Vector3(this.trackHalf, this.mountY, -this.wheelbaseHalf), prevComp: 0, comp: 0, contact: false, visualY: this.wheelRadius, steerAngle: 0.0 }
+      { id: 'FL', isFront: true,  isDriven: false, localPos: new THREE.Vector3(-this.trackHalf, this.mountY, this.wheelbaseHalf), prevComp: 0, comp: 0, normalForce: 0, contact: false, visualY: this.wheelRadius, steerAngle: 0.0 },
+      { id: 'FR', isFront: true,  isDriven: false, localPos: new THREE.Vector3(this.trackHalf, this.mountY, this.wheelbaseHalf), prevComp: 0, comp: 0, normalForce: 0, contact: false, visualY: this.wheelRadius, steerAngle: 0.0 },
+      { id: 'RL', isFront: false, isDriven: true,  localPos: new THREE.Vector3(-this.trackHalf, this.mountY, -this.wheelbaseHalf), prevComp: 0, comp: 0, normalForce: 0, contact: false, visualY: this.wheelRadius, steerAngle: 0.0 },
+      { id: 'RR', isFront: false, isDriven: true,  localPos: new THREE.Vector3(this.trackHalf, this.mountY, -this.wheelbaseHalf), prevComp: 0, comp: 0, normalForce: 0, contact: false, visualY: this.wheelRadius, steerAngle: 0.0 }
     ];
   }
 
@@ -65,8 +81,8 @@ export class PhysicsEngine {
       // 3. Dynamic Vehicle Chassis RigidBody
       const chassisBodyDesc = RAPIER.RigidBodyDesc.dynamic()
         .setTranslation(0.0, this.initialY, 0.0)
-        .setLinearDamping(0.15)
-        .setAngularDamping(0.35)
+        .setLinearDamping(0.08)
+        .setAngularDamping(0.3)
         .setCcdEnabled(true);
       this.chassisBody = this.world.createRigidBody(chassisBodyDesc);
 
@@ -74,23 +90,36 @@ export class PhysicsEngine {
       const chassisColliderDesc = RAPIER.ColliderDesc.cuboid(0.9, 0.28, 2.1)
         .setTranslation(0.0, 0.2, 0.0)
         .setMass(this.vehicleMass)
-        .setFriction(0.3)
+        .setFriction(0.2)
         .setRestitution(0.05);
       this.chassisCollider = this.world.createCollider(chassisColliderDesc, this.chassisBody);
 
       this.isReady = true;
 
-      // Update badge if present in DOM
+      // Update badge in UI
       const badge = document.getElementById('sim3d-physics-badge');
       if (badge) {
         badge.innerText = '⚡ RAPIER3D WASM ACTIVE';
         badge.className = 'badge badge-green';
       }
 
-      console.log("[Physics] Rapier3D WASM, suspension & Ackermann geometry initialized successfully.");
+      console.log("[Physics] Rapier3D WASM, raycast suspension, Ackermann & Pacejka tire dynamics ready.");
     } catch (err) {
       console.error("[Physics] Error loading Rapier3D WASM physics:", err);
     }
+  }
+
+  resetPosition() {
+    if (!this.chassisBody) return;
+    this.chassisBody.setTranslation({ x: 0.0, y: this.initialY, z: 0.0 }, true);
+    this.chassisBody.setRotation({ x: 0.0, y: 0.0, z: 0.0, w: 1.0 }, true);
+    this.chassisBody.setLinvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
+    this.chassisBody.setAngvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
+    this.setSteering(0.0);
+    this.engineRpm = 850.0;
+    this.gear = 1;
+    this.isReversing = false;
+    console.log("[Physics] Vehicle reset to starting grid.");
   }
 
   computeAckermann(steerAngle) {
@@ -103,15 +132,13 @@ export class PhysicsEngine {
     const absAngle = Math.abs(steerAngle);
     const turningRadius = L / Math.tan(absAngle);
 
-    // Ackermann formula: inner wheel turns sharper than outer wheel
+    // Ackermann formula
     const innerAngle = Math.atan(L / (turningRadius - W / 2));
     const outerAngle = Math.atan(L / (turningRadius + W / 2));
 
     if (steerAngle > 0) {
-      // Right turn: right wheel is inner, left wheel is outer
       return { left: outerAngle, right: innerAngle };
     } else {
-      // Left turn: left wheel is inner, right wheel is outer
       return { left: -innerAngle, right: -outerAngle };
     }
   }
@@ -129,12 +156,25 @@ export class PhysicsEngine {
       this.vehicleRig.setSteering(this.steerAngles.left, this.steerAngles.right);
     }
 
-    // Update Telemetry HUD steer value
     const hudSteer = document.getElementById('hud-3d-steer');
     if (hudSteer) {
       const deg = (this.currentSteer * 180 / Math.PI).toFixed(1);
       hudSteer.innerText = `${deg}°`;
     }
+  }
+
+  // Pacejka 'Magic Formula': Lateral cornering force from slip angle & normal load
+  pacejkaLateralForce(slipAngle, normalForce) {
+    if (normalForce <= 0) return 0;
+    const B = this.pacejkaB;
+    const C = this.pacejkaC;
+    const D = this.pacejkaD * normalForce;
+    const E = this.pacejkaE;
+
+    // F_y = D * sin(C * atan(B * alpha - E * (B * alpha - atan(B * alpha))))
+    const Ba = B * slipAngle;
+    const phi = Ba - E * (Ba - Math.atan(Ba));
+    return -D * Math.sin(C * Math.atan(phi));
   }
 
   updateSuspension(dt) {
@@ -149,10 +189,8 @@ export class PhysicsEngine {
 
     for (let i = 0; i < 4; i++) {
       const wheel = this.wheels[i];
-      // World position of suspension mount
       const worldMount = wheel.localPos.clone().applyQuaternion(cQuat).add(cPos);
 
-      // Cast Ray downwards along chassis down vector
       const ray = new this.RAPIER.Ray(
         { x: worldMount.x, y: worldMount.y, z: worldMount.z },
         { x: worldDown.x, y: worldDown.y, z: worldDown.z }
@@ -169,10 +207,10 @@ export class PhysicsEngine {
         wheel.comp = comp;
         wheel.contact = true;
 
-        // Spring + Damper Force: F = k * x + c * v
         const forceMag = Math.max(0, this.springStiffness * comp + this.springDamping * springVel);
+        wheel.normalForce = forceMag;
 
-        // Apply impulse to chassis at mount point
+        // Apply suspension spring impulse
         const impulse = {
           x: worldUp.x * forceMag * dt,
           y: worldUp.y * forceMag * dt,
@@ -180,17 +218,16 @@ export class PhysicsEngine {
         };
         this.chassisBody.applyImpulseAtPoint(impulse, { x: worldMount.x, y: worldMount.y, z: worldMount.z }, true);
 
-        // Visual wheel height
         wheel.visualY = wheel.localPos.y - dist + this.wheelRadius;
       } else {
         wheel.prevComp = 0;
         wheel.comp = 0;
         wheel.contact = false;
+        wheel.normalForce = 0;
         wheel.visualY = wheel.localPos.y - this.suspensionRestLength + this.wheelRadius;
       }
     }
 
-    // Sync visual suspension displacement to Three.js wheel models
     if (this.vehicleRig) {
       this.vehicleRig.setSuspensionY(
         this.wheels[0].visualY,
@@ -201,19 +238,181 @@ export class PhysicsEngine {
     }
   }
 
-  step(dt) {
+  updateTireForcesAndPowertrain(dt, controls) {
+    const chassisPos = this.chassisBody.translation();
+    const chassisRot = this.chassisBody.rotation();
+    const linvel = this.chassisBody.linvel();
+    const angvel = this.chassisBody.angvel();
+
+    const cPos = new THREE.Vector3(chassisPos.x, chassisPos.y, chassisPos.z);
+    const cQuat = new THREE.Quaternion(chassisRot.x, chassisRot.y, chassisRot.z, chassisRot.w);
+    const cLinvel = new THREE.Vector3(linvel.x, linvel.y, linvel.z);
+    const cAngvel = new THREE.Vector3(angvel.x, angvel.y, angvel.z);
+
+    // Chassis local forward (+Z) and right (+X) vectors
+    const chassisFwd = new THREE.Vector3(0, 0, 1).applyQuaternion(cQuat);
+    const chassisRight = new THREE.Vector3(1, 0, 0).applyQuaternion(cQuat);
+    const chassisUp = new THREE.Vector3(0, 1, 0).applyQuaternion(cQuat);
+
+    // Forward speed along heading
+    const forwardSpeed = cLinvel.dot(chassisFwd);
+    this.forwardSpeedKmh = forwardSpeed * 3.6;
+
+    // Automatic Gear Shifting logic
+    const absSpeedKmh = Math.abs(this.forwardSpeedKmh);
+    if (controls.brake > 0.1 && forwardSpeed < 0.2 && !this.isReversing) {
+      this.isReversing = true;
+    } else if (controls.throttle > 0.1 && forwardSpeed > -0.2 && this.isReversing) {
+      this.isReversing = false;
+    }
+
+    if (!this.isReversing) {
+      if (absSpeedKmh < 42) this.gear = 1;
+      else if (absSpeedKmh < 75) this.gear = 2;
+      else if (absSpeedKmh < 112) this.gear = 3;
+      else if (absSpeedKmh < 155) this.gear = 4;
+      else if (absSpeedKmh < 205) this.gear = 5;
+      else this.gear = 6;
+    }
+
+    // Engine RPM calculation
+    const gearRatio = this.isReversing ? 3.5 : this.gearRatios[this.gear - 1];
+    const targetRpm = Math.max(850, Math.min(7200, (absSpeedKmh / 3.6 / this.wheelRadius) * gearRatio * this.finalDrive * (60 / (2 * Math.PI))));
+    this.engineRpm = THREE.MathUtils.lerp(this.engineRpm, controls.throttle > 0.05 ? Math.max(targetRpm, 2400 * controls.throttle) : targetRpm, dt * 5.0);
+
+    // Drive force calculation
+    let driveForceTotal = 0;
+    if (!this.isReversing) {
+      driveForceTotal = (controls.throttle * this.maxTorque * gearRatio * this.finalDrive) / this.wheelRadius;
+    } else {
+      driveForceTotal = -(controls.brake * this.maxTorque * gearRatio * this.finalDrive) / this.wheelRadius;
+    }
+
+    const driveForcePerRearWheel = driveForceTotal / 2;
+    const brakeForcePerWheel = (controls.brake * 6500) / 4;
+
+    // Apply Pacejka friction & traction for all 4 wheels
+    for (let i = 0; i < 4; i++) {
+      const wheel = this.wheels[i];
+      if (!wheel.contact || wheel.normalForce <= 0) continue;
+
+      // Contact point in world space
+      const worldMount = wheel.localPos.clone().applyQuaternion(cQuat).add(cPos);
+      const contactPatch = worldMount.clone().add(new THREE.Vector3(0, -this.suspensionRestLength + wheel.comp, 0));
+
+      // Velocity at contact patch = v_chassis + omega x r
+      const r = contactPatch.clone().sub(cPos);
+      const patchVel = cLinvel.clone().add(cAngvel.clone().cross(r));
+
+      // Wheel Heading & Lateral vectors (accounting for steering angle)
+      const wheelSteerRot = new THREE.Quaternion().setFromAxisAngle(chassisUp, wheel.steerAngle);
+      const wheelFwd = chassisFwd.clone().applyQuaternion(wheelSteerRot);
+      const wheelLat = chassisRight.clone().applyQuaternion(wheelSteerRot);
+
+      // Velocity components in wheel frame
+      const vLong = patchVel.dot(wheelFwd);
+      const vLat = patchVel.dot(wheelLat);
+
+      // Slip angle alpha = atan(vLat / (|vLong| + 0.1))
+      const slipAngle = Math.atan2(vLat, Math.abs(vLong) + 0.2);
+
+      // 1. Lateral Force from Pacejka Formula
+      let fLat = this.pacejkaLateralForce(slipAngle, wheel.normalForce);
+
+      // Handbrake drift multiplier on rear wheels
+      if (controls.handbrake && !wheel.isFront) {
+        fLat *= 0.35; // Break rear traction into drift
+      }
+
+      // 2. Longitudinal Force (Drive / Brake / Rolling resistance)
+      let fLong = 0;
+      if (wheel.isDriven && !controls.handbrake) {
+        fLong += driveForcePerRearWheel;
+      }
+
+      // Braking opposing velocity
+      if (controls.brake > 0.02 && !this.isReversing) {
+        fLong -= Math.sign(vLong || 1) * Math.min(brakeForcePerWheel, Math.abs(vLong) * 2000);
+      } else if (controls.handbrake && !wheel.isFront) {
+        fLong -= Math.sign(vLong || 1) * Math.min(5000, Math.abs(vLong) * 3000);
+      } else {
+        // Rolling resistance
+        fLong -= Math.sign(vLong || 1) * Math.min(60, Math.abs(vLong) * 30);
+      }
+
+      // 3. Friction Circle Clamping: sqrt(Fx^2 + Fy^2) <= mu * Fz
+      const maxTireGrip = this.pacejkaD * wheel.normalForce;
+      const totalF = Math.sqrt(fLong * fLong + fLat * fLat);
+      if (totalF > maxTireGrip && totalF > 0) {
+        const scale = maxTireGrip / totalF;
+        fLong *= scale;
+        fLat *= scale;
+      }
+
+      // World force vector = fLong * wheelFwd + fLat * wheelLat
+      const totalWorldForce = wheelFwd.clone().multiplyScalar(fLong).add(wheelLat.clone().multiplyScalar(fLat));
+
+      // Apply impulse to Rapier body at contact patch
+      const impulse = {
+        x: totalWorldForce.x * dt,
+        y: totalWorldForce.y * dt,
+        z: totalWorldForce.z * dt
+      };
+      this.chassisBody.applyImpulseAtPoint(impulse, { x: contactPatch.x, y: contactPatch.y, z: contactPatch.z }, true);
+    }
+
+    // Spin visual wheels based on forward motion
+    const spinDelta = (forwardSpeed / this.wheelRadius) * dt;
+    if (this.vehicleRig) {
+      this.vehicleRig.spinWheels(spinDelta);
+      this.vehicleRig.setBraking(controls.brake > 0.05 || controls.handbrake);
+    }
+
+    // Update Telemetry HUD displays
+    this.updateHUD();
+  }
+
+  updateHUD() {
+    const speedElem = document.getElementById('hud-3d-speed');
+    const rpmElem = document.getElementById('hud-3d-rpm');
+    const gearElem = document.getElementById('hud-3d-gear');
+
+    if (speedElem) {
+      const spd = Math.abs(Math.round(this.forwardSpeedKmh));
+      speedElem.innerHTML = `${spd}<span class="unit">KM/H</span>`;
+    }
+    if (rpmElem) {
+      const rpm = Math.round(this.engineRpm);
+      rpmElem.innerText = `${rpm}`;
+    }
+    if (gearElem) {
+      gearElem.innerText = this.isReversing ? 'R' : `${this.gear}`;
+    }
+  }
+
+  step(dt, controls) {
     if (!this.isReady || !this.world || !this.chassisBody) return;
 
     const clampedDt = Math.min(dt, 0.05);
 
-    // 1. Calculate & apply 4-wheel suspension forces
+    // Apply Steering
+    if (controls) {
+      this.setSteering(controls.steer * this.maxSteerAngle);
+    }
+
+    // 1. Suspension forces
     this.updateSuspension(clampedDt);
 
-    // 2. Step Rapier3D physics world
+    // 2. Pacejka tire traction & powertrain forces
+    if (controls) {
+      this.updateTireForcesAndPowertrain(clampedDt, controls);
+    }
+
+    // 3. Step Rapier3D physics world
     this.world.timestep = clampedDt;
     this.world.step();
 
-    // 3. Sync chassis translation & rotation to Three.js vehicleRig root
+    // 4. Sync chassis translation & rotation to Three.js vehicleRig root
     const trans = this.chassisBody.translation();
     const rot = this.chassisBody.rotation();
 
