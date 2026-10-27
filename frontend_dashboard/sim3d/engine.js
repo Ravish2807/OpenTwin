@@ -1,10 +1,11 @@
 /**
  * OpenTwin: 3D Vehicle Simulation & Digital Twin Engine
- * Phase 1.1 — 3D Viewport Scaffold, Camera Rig, and Modular Render Loop
+ * Phase 1.1 & 1.2 — 3D Viewport Scaffold, Camera Rig, Environment, and Render Loop
  */
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+import { EnvironmentManager } from './environment.js';
 
 export class Sim3DEngine {
   constructor(containerId) {
@@ -18,6 +19,7 @@ export class Sim3DEngine {
     this.camera = null;
     this.renderer = null;
     this.orbitControls = null;
+    this.environment = null;
     this.cameraMode = 'chase'; // 'chase' | 'orbit' | 'cockpit'
 
     this.vehicleGroup = new THREE.Group();
@@ -73,18 +75,21 @@ export class Sim3DEngine {
     this.orbitControls.maxDistance = 60.0;
     this.orbitControls.enabled = (this.cameraMode === 'orbit');
 
-    // 5. Add Vehicle Group into Scene
+    // 5. Environment & Lighting Rig (Phase 1.2)
+    this.environment = new EnvironmentManager(this.scene, this.renderer);
+
+    // 6. Add Vehicle Group into Scene
     this.scene.add(this.vehicleGroup);
 
-    // 6. Handle Viewport Resizing
+    // 7. Handle Viewport Resizing
     this.setupResizeObserver();
 
-    // 7. Start Render Loop
+    // 8. Start Render Loop
     this.isInitialized = true;
     this.animate = this.animate.bind(this);
     requestAnimationFrame(this.animate);
 
-    console.log("[Sim3D] Viewport scaffold initialized successfully.");
+    console.log("[Sim3D] Viewport scaffold & environment initialized successfully.");
   }
 
   setupResizeObserver() {
@@ -145,6 +150,11 @@ export class Sim3DEngine {
   animate() {
     requestAnimationFrame(this.animate);
     const delta = Math.min(this.clock.getDelta(), 0.1);
+
+    // Follow vehicle with directional sun shadow frustum
+    if (this.environment && this.vehicleGroup) {
+      this.environment.update(this.vehicleGroup.position);
+    }
 
     // Execute user registered update loops (Physics, inputs, animations)
     for (const cb of this.onUpdateCallbacks) {
