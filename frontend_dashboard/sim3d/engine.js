@@ -1,12 +1,13 @@
 /**
  * OpenTwin: 3D Vehicle Simulation & Digital Twin Engine
- * Phase 1.1, 1.2 & 1.3 — Viewport, Camera, Environment, PBR Rigged Vehicle
+ * Phase 1 & Phase 2.1 — Viewport, Camera, Environment, PBR Rigged Vehicle, Rapier3D Physics
  */
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
 import { EnvironmentManager } from './environment.js';
 import { VehicleRig } from './vehicle.js';
+import { PhysicsEngine } from './physics.js';
 
 export class Sim3DEngine {
   constructor(containerId) {
@@ -22,6 +23,7 @@ export class Sim3DEngine {
     this.orbitControls = null;
     this.environment = null;
     this.vehicleRig = null;
+    this.physics = null;
     this.cameraMode = 'chase'; // 'chase' | 'orbit' | 'cockpit'
 
     this.vehicleGroup = new THREE.Group();
@@ -40,7 +42,7 @@ export class Sim3DEngine {
     this.init();
   }
 
-  init() {
+  async init() {
     const width = this.container.clientWidth || 800;
     const height = this.container.clientHeight || 500;
 
@@ -84,15 +86,19 @@ export class Sim3DEngine {
     this.vehicleRig = new VehicleRig(this.scene);
     this.vehicleGroup = this.vehicleRig.root;
 
-    // 7. Handle Viewport Resizing
+    // 7. Rapier3D Physics Engine (Phase 2.1)
+    this.physics = new PhysicsEngine(this.vehicleRig);
+    await this.physics.init();
+
+    // 8. Handle Viewport Resizing
     this.setupResizeObserver();
 
-    // 8. Start Render Loop
+    // 9. Start Render Loop
     this.isInitialized = true;
     this.animate = this.animate.bind(this);
     requestAnimationFrame(this.animate);
 
-    console.log("[Sim3D] Viewport scaffold, environment & vehicle rig initialized successfully.");
+    console.log("[Sim3D] Viewport scaffold, environment, vehicle rig & physics initialized successfully.");
   }
 
   setupResizeObserver() {
@@ -154,12 +160,17 @@ export class Sim3DEngine {
     requestAnimationFrame(this.animate);
     const delta = Math.min(this.clock.getDelta(), 0.1);
 
+    // Step Physics Simulation (Phase 2.1)
+    if (this.physics && this.physics.isReady) {
+      this.physics.step(delta);
+    }
+
     // Follow vehicle with directional sun shadow frustum
     if (this.environment && this.vehicleGroup) {
       this.environment.update(this.vehicleGroup.position);
     }
 
-    // Execute user registered update loops (Physics, inputs, animations)
+    // Execute user registered update loops (Inputs, custom animations)
     for (const cb of this.onUpdateCallbacks) {
       cb(delta);
     }
