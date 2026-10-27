@@ -1,11 +1,12 @@
 /**
  * OpenTwin: 3D Vehicle Simulation & Digital Twin Engine
- * Phase 1.1 & 1.2 — 3D Viewport Scaffold, Camera Rig, Environment, and Render Loop
+ * Phase 1.1, 1.2 & 1.3 — Viewport, Camera, Environment, PBR Rigged Vehicle
  */
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
 import { EnvironmentManager } from './environment.js';
+import { VehicleRig } from './vehicle.js';
 
 export class Sim3DEngine {
   constructor(containerId) {
@@ -20,6 +21,7 @@ export class Sim3DEngine {
     this.renderer = null;
     this.orbitControls = null;
     this.environment = null;
+    this.vehicleRig = null;
     this.cameraMode = 'chase'; // 'chase' | 'orbit' | 'cockpit'
 
     this.vehicleGroup = new THREE.Group();
@@ -78,8 +80,9 @@ export class Sim3DEngine {
     // 5. Environment & Lighting Rig (Phase 1.2)
     this.environment = new EnvironmentManager(this.scene, this.renderer);
 
-    // 6. Add Vehicle Group into Scene
-    this.scene.add(this.vehicleGroup);
+    // 6. Build High-Fidelity Rigged Vehicle (Phase 1.3)
+    this.vehicleRig = new VehicleRig(this.scene);
+    this.vehicleGroup = this.vehicleRig.root;
 
     // 7. Handle Viewport Resizing
     this.setupResizeObserver();
@@ -89,7 +92,7 @@ export class Sim3DEngine {
     this.animate = this.animate.bind(this);
     requestAnimationFrame(this.animate);
 
-    console.log("[Sim3D] Viewport scaffold & environment initialized successfully.");
+    console.log("[Sim3D] Viewport scaffold, environment & vehicle rig initialized successfully.");
   }
 
   setupResizeObserver() {
