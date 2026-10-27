@@ -778,6 +778,8 @@ function setupEventListeners() {
       // Trigger redraws if needed
       if (state.activeTab === 'oscilloscope') {
         initOscilloscope();
+      } else if (state.activeTab === 'sim3d' && window.sim3d) {
+        window.sim3d.resize();
       }
     });
   });

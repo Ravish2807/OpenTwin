@@ -27,6 +27,9 @@
           <button class="nav-tab active" data-tab="cockpit">
             <span class="tab-icon">🚀</span> Cockpit Cluster
           </button>
+          <button class="nav-tab" data-tab="sim3d">
+            <span class="tab-icon">🚗</span> 3D Digital Twin
+          </button>
           <button class="nav-tab" data-tab="oscilloscope">
             <span class="tab-icon">📈</span> Signal Grapher
           </button>
@@ -212,16 +215,13 @@
               
               <div class="car-silhouette">
                 <svg class="car-svg" viewBox="0 0 160 300">
-                  <!-- Car Body Wireframe -->
                   <path class="car-body" d="M40 50 Q80 35 120 50 L130 90 L135 180 L125 260 Q80 270 35 260 L25 180 L30 90 Z" />
                   <path class="car-windshield" d="M48 95 Q80 85 112 95 L118 135 Q80 140 42 135 Z" />
                   <path class="car-rear-window" d="M45 205 Q80 200 115 205 L118 235 Q80 240 42 235 Z" />
-                  <!-- 4 Wheels with rotation capability -->
                   <rect class="wheel-rect wheel-fl" id="wheel-front-left" x="12" y="70" width="14" height="32" rx="4" />
                   <rect class="wheel-rect wheel-fr" id="wheel-front-right" x="134" y="70" width="14" height="32" rx="4" />
                   <rect class="wheel-rect" x="12" y="210" width="14" height="32" rx="4" />
                   <rect class="wheel-rect" x="134" y="210" width="14" height="32" rx="4" />
-                  <!-- Headlamp Beams -->
                   <polygon class="headlamp-beam" id="beam-left" points="35,45 15,5 55,5" />
                   <polygon class="headlamp-beam" id="beam-right" points="125,45 105,5 145,5" />
                 </svg>
@@ -329,7 +329,65 @@
         </div>
       </section>
 
-      <!-- ================= TAB 2: SIGNAL OSCILLOSCOPE ================= -->
+      <!-- ================= TAB 2: 3D DIGITAL TWIN VIEWPORT ================= -->
+      <section class="tab-content" id="tab-sim3d">
+        <div class="card sim3d-card">
+          <div class="card-header">
+            <div class="title-with-pill">
+              <span class="card-title">PHOTOREALISTIC 3D VEHICLE DIGITAL TWIN</span>
+              <span class="badge badge-cyan" id="sim3d-physics-badge">● THREE.JS 3D VIEWPORT</span>
+            </div>
+            
+            <div class="sim3d-header-controls">
+              <div class="camera-mode-pills">
+                <span class="ctrl-label">CAMERA:</span>
+                <button class="cam-btn active" data-cam="chase" id="cam-btn-chase">🎥 Chase Cam</button>
+                <button class="cam-btn" data-cam="orbit" id="cam-btn-orbit">🔄 Free Orbit</button>
+                <button class="cam-btn" data-cam="cockpit" id="cam-btn-cockpit">🏎️ Cockpit Cam</button>
+              </div>
+              <div class="sim-mode-pills">
+                <button class="btn btn-sm btn-primary" id="btn-toggle-sim-mode">🎮 Virtual Drive (WASD)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3D Viewport View -->
+          <div class="sim3d-viewport-wrapper">
+            <div id="sim3d-canvas-container" class="sim3d-canvas"></div>
+            
+            <!-- Real-time 3D Telemetry Overlay HUD -->
+            <div class="sim3d-hud-overlay">
+              <div class="hud-stat-box">
+                <span class="hud-stat-label">3D VELOCITY</span>
+                <span class="hud-stat-num cyan" id="hud-3d-speed">0.0 <small>km/h</small></span>
+              </div>
+              <div class="hud-stat-box">
+                <span class="hud-stat-label">ENGINE RPM</span>
+                <span class="hud-stat-num" id="hud-3d-rpm">850 <small>RPM</small></span>
+              </div>
+              <div class="hud-stat-box">
+                <span class="hud-stat-label">GEAR</span>
+                <span class="hud-stat-num amber" id="hud-3d-gear">D</span>
+              </div>
+              <div class="hud-stat-box">
+                <span class="hud-stat-label">STEERING</span>
+                <span class="hud-stat-num" id="hud-3d-steer">0.0&deg;</span>
+              </div>
+            </div>
+
+            <!-- Driving Controls Help Overlay -->
+            <div class="sim3d-controls-legend">
+              <span class="legend-key">W / &uarr;</span> Throttle &nbsp;|&nbsp;
+              <span class="legend-key">S / &darr;</span> Brake/Reverse &nbsp;|&nbsp;
+              <span class="legend-key">A / D</span> Steer &nbsp;|&nbsp;
+              <span class="legend-key">SPACE</span> Handbrake &nbsp;|&nbsp;
+              <span class="legend-key">C</span> Switch Camera
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 3: SIGNAL OSCILLOSCOPE ================= -->
       <section class="tab-content" id="tab-oscilloscope">
         <div class="card oscilloscope-card">
           <div class="card-header">
@@ -383,7 +441,7 @@
         </div>
       </section>
 
-      <!-- ================= TAB 3: CAN BUS INSPECTOR ================= -->
+      <!-- ================= TAB 4: CAN BUS INSPECTOR ================= -->
       <section class="tab-content" id="tab-inspector">
         <div class="card inspector-workbench-card">
           
@@ -450,7 +508,7 @@
         </div>
       </section>
 
-      <!-- ================= TAB 4: ECU INJECTOR & FAULT INJECTION ================= -->
+      <!-- ================= TAB 5: ECU INJECTOR & FAULT INJECTION ================= -->
       <section class="tab-content" id="tab-injector">
         <div class="injector-workbench-grid">
           
@@ -600,7 +658,7 @@
         </div>
       </section>
 
-      <!-- ================= TAB 5: DBC DATA CATALOG ================= -->
+      <!-- ================= TAB 6: DBC DATA CATALOG ================= -->
       <section class="tab-content" id="tab-dbc">
         <div class="card dbc-explorer-card">
           <div class="card-header">
@@ -624,5 +682,27 @@
   </div>
 
   <script src="app.js"></script>
+  <script type="module">
+    import { Sim3DEngine } from './sim3d/engine.js';
+    window.addEventListener('DOMContentLoaded', () => {
+      window.sim3d = new Sim3DEngine('sim3d-canvas-container');
+
+      // Bind camera buttons
+      const btnChase = document.getElementById('cam-btn-chase');
+      const btnOrbit = document.getElementById('cam-btn-orbit');
+      const btnCockpit = document.getElementById('cam-btn-cockpit');
+      const camButtons = [btnChase, btnOrbit, btnCockpit];
+
+      function selectCam(btn, mode) {
+        camButtons.forEach(b => b && b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        if (window.sim3d) window.sim3d.setCameraMode(mode);
+      }
+
+      if (btnChase) btnChase.addEventListener('click', () => selectCam(btnChase, 'chase'));
+      if (btnOrbit) btnOrbit.addEventListener('click', () => selectCam(btnOrbit, 'orbit'));
+      if (btnCockpit) btnCockpit.addEventListener('click', () => selectCam(btnCockpit, 'cockpit'));
+    });
+  </script>
 </body>
 </html>
