@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 840" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 960" width="100%" height="100%">
   <defs>
     <!-- Background Grid -->
     <pattern id="arch-grid" width="24" height="24" patternUnits="userSpaceOnUse">
@@ -48,6 +48,10 @@
         stroke-dasharray: 6 6;
         animation: dashFlow 1.2s linear infinite;
       }
+      .flow-cyan-rev {
+        stroke-dasharray: 6 6;
+        animation: dashFlowRev 1.2s linear infinite;
+      }
       .flow-green {
         stroke-dasharray: 6 6;
         animation: dashFlow 1.4s linear infinite;
@@ -76,245 +80,268 @@
   </defs>
 
   <!-- Canvas Background -->
-  <rect width="1240" height="840" rx="16" fill="#080c18" stroke="#1e2640" stroke-width="1.5" />
-  <rect width="1240" height="840" rx="16" fill="url(#arch-grid)" />
+  <rect width="1240" height="960" rx="16" fill="#080c18" stroke="#1e2640" stroke-width="1.5" />
+  <rect width="1240" height="960" rx="16" fill="url(#arch-grid)" />
 
   <!-- ================= TOP HEADER ================= -->
-  <text x="45" y="48" fill="#ffffff" font-size="22" font-weight="800" letter-spacing="0.5">
-    OpenTwin · virtual CAN network &amp; telemetry replay engine
+  <text x="45" y="46" fill="#ffffff" font-size="22" font-weight="800" letter-spacing="0.5">
+    OpenTwin · 3D Vehicle Simulation &amp; Automotive CAN Network Twin
   </text>
-  <text x="45" y="72" fill="#94a3b8" font-size="13" font-weight="500">
-    Synthetic drive cycles, in-kernel SocketCAN transport, DBC decoding, and interactive cluster workbench.
+  <text x="45" y="70" fill="#94a3b8" font-size="13" font-weight="500">
+    Three.js PBR Rendering, Rapier3D WASM Physics, Pacejka Tire Dynamics, Linux SocketCAN &amp; DBC Telemetry.
   </text>
 
   <!-- Top Right Mode Badge -->
-  <rect x="880" y="32" width="315" height="34" rx="17" fill="rgba(16, 185, 129, 0.12)" stroke="#10b981" stroke-width="1" />
-  <circle cx="902" cy="49" r="4.5" fill="#10b981" class="live-pulse" />
-  <text x="918" y="54" fill="#6ee7b7" class="mono" font-size="11" font-weight="700">
-    ANIMATED DATA FLOW · real-time CAN loop
+  <rect x="880" y="30" width="315" height="34" rx="17" fill="rgba(16, 185, 129, 0.12)" stroke="#10b981" stroke-width="1" />
+  <circle cx="902" cy="47" r="4.5" fill="#10b981" class="live-pulse" />
+  <text x="918" y="52" fill="#6ee7b7" class="mono" font-size="11" font-weight="700">
+    ANIMATED FLOW · 3D PHYSICS &amp; CAN BUS
   </text>
 
   <!-- ================= MAIN RUNTIME CONTAINER (Dashed Outer Box) ================= -->
-  <rect x="35" y="105" width="1170" height="555" rx="16" fill="rgba(15, 23, 42, 0.4)" stroke="#818cf8" stroke-width="1.8" stroke-dasharray="8 6" />
+  <rect x="35" y="98" width="1170" height="690" rx="16" fill="rgba(15, 23, 42, 0.4)" stroke="#818cf8" stroke-width="1.8" stroke-dasharray="8 6" />
   
   <!-- Outer Container Tag -->
-  <rect x="180" y="93" width="460" height="24" rx="6" fill="#1e1b4b" stroke="#818cf8" stroke-width="1" />
-  <text x="410" y="109" fill="#c7d2fe" class="mono" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="1">
-    APPLICATION RUNTIME - Linux SocketCAN Kernel / Async Telemetry Hub
+  <rect x="180" y="86" width="500" height="24" rx="6" fill="#1e1b4b" stroke="#818cf8" stroke-width="1" />
+  <text x="430" y="102" fill="#c7d2fe" class="mono" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="1">
+    OPENTWIN RUNTIME · Linux SocketCAN Kernel / WASM Physics / WebSocket Hub
   </text>
 
   <!-- ================= SUBGRAPH 1: CAN DATA SOURCES (Left Box) ================= -->
-  <rect x="52" y="135" width="180" height="315" rx="12" fill="#0c1527" stroke="#38bdf8" stroke-width="1.4" />
-  <circle cx="70" cy="155" r="4" fill="#38bdf8" />
-  <text x="82" y="160" fill="#ffffff" font-size="13" font-weight="700">CAN Data Sources</text>
-  <text x="70" y="176" fill="#64748b" font-size="9.5">candump logs &amp; generator</text>
+  <rect x="52" y="125" width="180" height="305" rx="12" fill="#0c1527" stroke="#38bdf8" stroke-width="1.4" />
+  <circle cx="70" cy="145" r="4" fill="#38bdf8" />
+  <text x="82" y="150" fill="#ffffff" font-size="13" font-weight="700">CAN Data Sources</text>
+  <text x="70" y="166" fill="#64748b" font-size="9.5">candump logs &amp; generator</text>
 
   <!-- Sub-Card 1: Log Replayer -->
-  <rect x="64" y="195" width="156" height="68" rx="8" fill="#111827" stroke="#1f293d" stroke-width="1" />
-  <text x="76" y="217" fill="#ffffff" font-size="12" font-weight="700">sample_drive.log</text>
-  <text x="76" y="233" fill="#38bdf8" class="mono" font-size="9.5">5,100+ raw frames</text>
-  <text x="76" y="248" fill="#64748b" font-size="9.5">candump format</text>
+  <rect x="64" y="180" width="156" height="65" rx="8" fill="#111827" stroke="#1f293d" stroke-width="1" />
+  <text x="76" y="200" fill="#ffffff" font-size="11.5" font-weight="700">sample_drive.log</text>
+  <text x="76" y="216" fill="#38bdf8" class="mono" font-size="9.5">5,100+ raw frames</text>
+  <text x="76" y="230" fill="#64748b" font-size="9">candump standard format</text>
 
   <!-- Sub-Card 2: Generator -->
-  <rect x="64" y="275" width="156" height="68" rx="8" fill="#111827" stroke="#1f293d" stroke-width="1" />
-  <text x="76" y="297" fill="#ffffff" font-size="12" font-weight="700">generate_logs.py</text>
-  <text x="76" y="313" fill="#38bdf8" class="mono" font-size="9.5">50Hz Physics Model</text>
-  <text x="76" y="328" fill="#64748b" font-size="9.5">Startup • Drive • Brake</text>
+  <rect x="64" y="255" width="156" height="65" rx="8" fill="#111827" stroke="#1f293d" stroke-width="1" />
+  <text x="76" y="275" fill="#ffffff" font-size="11.5" font-weight="700">generate_logs.py</text>
+  <text x="76" y="291" fill="#38bdf8" class="mono" font-size="9.5">50Hz Physics Model</text>
+  <text x="76" y="305" fill="#64748b" font-size="9">Startup • Drive • Brake</text>
 
   <!-- Sub-Card 3: canplayer -->
-  <rect x="64" y="355" width="156" height="78" rx="8" fill="#111827" stroke="#1f293d" stroke-width="1" />
-  <text x="76" y="377" fill="#ffffff" font-size="12" font-weight="700">canplayer Injector</text>
-  <text x="76" y="393" fill="#38bdf8" class="mono" font-size="9.5">scripts/replay_log.sh</text>
-  <text x="76" y="408" fill="#64748b" font-size="9">Replays @ true timestamps</text>
-  <text x="76" y="421" fill="#64748b" font-size="9">0.5x, 1x, 2x, 5x rate</text>
+  <rect x="64" y="330" width="156" height="88" rx="8" fill="#111827" stroke="#1f293d" stroke-width="1" />
+  <text x="76" y="350" fill="#ffffff" font-size="11.5" font-weight="700">canplayer Injector</text>
+  <text x="76" y="366" fill="#38bdf8" class="mono" font-size="9.5">scripts/replay_log.sh</text>
+  <text x="76" y="381" fill="#64748b" font-size="9">Replays @ real timestamps</text>
+  <text x="76" y="394" fill="#64748b" font-size="9">0.5x, 1x, 2x, 5x speed</text>
 
   <!-- ================= SUBGRAPH 2: VIRTUAL TRANSPORT (Center-Left Box) ================= -->
-  <rect x="248" y="135" width="165" height="315" rx="12" fill="#061a29" stroke="#00f0ff" stroke-width="1.6" />
-  <circle cx="266" cy="155" r="4" fill="#00f0ff" />
-  <text x="278" y="160" fill="#ffffff" font-size="13" font-weight="700">Virtual Transport</text>
-  <text x="266" y="176" fill="#64748b" font-size="9.5">In-memory network loopback</text>
+  <rect x="248" y="125" width="165" height="305" rx="12" fill="#061a29" stroke="#00f0ff" stroke-width="1.6" />
+  <circle cx="266" cy="145" r="4" fill="#00f0ff" />
+  <text x="278" y="150" fill="#ffffff" font-size="13" font-weight="700">Virtual Transport</text>
+  <text x="266" y="166" fill="#64748b" font-size="9.5">In-memory network loopback</text>
 
   <!-- Sub-Card 1: vcan0 Interface -->
-  <rect x="260" y="195" width="141" height="115" rx="8" fill="#04253a" stroke="#00f0ff" stroke-width="1.5" />
-  <circle cx="385" cy="212" r="3.5" fill="#00f0ff" class="live-pulse" />
-  <text x="272" y="218" fill="#00f0ff" class="mono" font-size="12" font-weight="800">vcan0 Device</text>
-  <text x="272" y="238" fill="#ffffff" font-size="11" font-weight="600">Linux SocketCAN</text>
-  <text x="272" y="258" fill="#a5f3fc" class="mono" font-size="9.5">Bitrate: 500 kbps</text>
-  <text x="272" y="275" fill="#a5f3fc" class="mono" font-size="9.5">RAM Loopback</text>
-  <text x="272" y="292" fill="#38bdf8" font-size="9.5">0% packet drop</text>
+  <rect x="260" y="180" width="141" height="115" rx="8" fill="#04253a" stroke="#00f0ff" stroke-width="1.5" />
+  <circle cx="385" cy="197" r="3.5" fill="#00f0ff" class="live-pulse" />
+  <text x="272" y="202" fill="#00f0ff" class="mono" font-size="12" font-weight="800">vcan0 Device</text>
+  <text x="272" y="222" fill="#ffffff" font-size="11" font-weight="600">Linux SocketCAN</text>
+  <text x="272" y="242" fill="#a5f3fc" class="mono" font-size="9.5">Bitrate: 500 kbps</text>
+  <text x="272" y="259" fill="#a5f3fc" class="mono" font-size="9.5">RAM Loopback</text>
+  <text x="272" y="276" fill="#38bdf8" font-size="9.5">0% packet drop</text>
 
   <!-- Sub-Card 2: setup_vcan.sh -->
-  <rect x="260" y="325" width="141" height="108" rx="8" fill="#111827" stroke="#1f293d" stroke-width="1" />
-  <text x="272" y="347" fill="#ffffff" font-size="11.5" font-weight="700">setup_vcan.sh</text>
-  <text x="272" y="365" fill="#94a3b8" font-size="9.5">modprobe vcan</text>
-  <text x="272" y="382" fill="#94a3b8" font-size="9.5">ip link add dev</text>
-  <text x="272" y="399" fill="#94a3b8" font-size="9.5">vcan0 type vcan</text>
-  <text x="272" y="416" fill="#34d399" class="mono" font-size="9.5">State: UP</text>
+  <rect x="260" y="305" width="141" height="113" rx="8" fill="#111827" stroke="#1f293d" stroke-width="1" />
+  <text x="272" y="327" fill="#ffffff" font-size="11.5" font-weight="700">setup_vcan.sh</text>
+  <text x="272" y="345" fill="#94a3b8" font-size="9.5">modprobe vcan</text>
+  <text x="272" y="362" fill="#94a3b8" font-size="9.5">ip link add dev</text>
+  <text x="272" y="379" fill="#94a3b8" font-size="9.5">vcan0 type vcan</text>
+  <text x="272" y="396" fill="#34d399" class="mono" font-size="9.5">State: UP (500k)</text>
 
   <!-- ================= SUBGRAPH 3: TELEMETRY SERVICE & DECODER (Center Box) ================= -->
-  <rect x="428" y="135" width="435" height="315" rx="12" fill="#061d18" stroke="#10b981" stroke-width="1.6" />
-  <circle cx="446" cy="155" r="4" fill="#10b981" />
-  <text x="458" y="160" fill="#ffffff" font-size="13" font-weight="700">Telemetry Service - DBC decoding &amp; streaming</text>
-  <text x="446" y="176" fill="#64748b" font-size="9.5">Read path: Hex payloads translated to physical units before broadcast</text>
+  <rect x="428" y="125" width="435" height="305" rx="12" fill="#061d18" stroke="#10b981" stroke-width="1.6" />
+  <circle cx="446" cy="145" r="4" fill="#10b981" />
+  <text x="458" y="150" fill="#ffffff" font-size="13" font-weight="700">Telemetry Service - DBC decoding &amp; streaming</text>
+  <text x="446" y="166" fill="#64748b" font-size="9.5">Read path: Hex payloads translated to physical units before broadcast</text>
 
   <!-- Step Box 1: Unpack -->
-  <rect x="440" y="195" width="125" height="110" rx="8" fill="#111827" stroke="#10b981" stroke-width="1" />
-  <text x="450" y="217" fill="#10b981" class="mono" font-size="11" font-weight="700">1. Unpack Hex</text>
-  <text x="450" y="237" fill="#94a3b8" font-size="9.5">Arbitration ID</text>
-  <text x="450" y="253" fill="#94a3b8" font-size="9.5">0x100, 0x200, 0x300</text>
-  <text x="450" y="271" fill="#94a3b8" font-size="9.5">Bitfield slicing</text>
-  <text x="450" y="289" fill="#6ee7b7" class="mono" font-size="9">LE byte order</text>
+  <rect x="440" y="180" width="125" height="105" rx="8" fill="#111827" stroke="#10b981" stroke-width="1" />
+  <text x="450" y="202" fill="#10b981" class="mono" font-size="11" font-weight="700">1. Unpack Hex</text>
+  <text x="450" y="222" fill="#94a3b8" font-size="9.5">Arbitration ID</text>
+  <text x="450" y="238" fill="#94a3b8" font-size="9.5">0x100, 0x200, 0x300</text>
+  <text x="450" y="256" fill="#94a3b8" font-size="9.5">Bitfield slicing</text>
+  <text x="450" y="274" fill="#6ee7b7" class="mono" font-size="9">LE byte order</text>
 
   <!-- Step Box 2: DBC Scaling -->
-  <rect x="580" y="195" width="125" height="110" rx="8" fill="#111827" stroke="#10b981" stroke-width="1" />
-  <text x="590" y="217" fill="#10b981" class="mono" font-size="11" font-weight="700">2. DBC Scaling</text>
-  <text x="590" y="237" fill="#94a3b8" font-size="9.5">Scale factor</text>
-  <text x="590" y="253" fill="#94a3b8" font-size="9.5">Offset equations</text>
-  <text x="590" y="271" fill="#94a3b8" font-size="9.5">Min/Max clamp</text>
-  <text x="590" y="289" fill="#6ee7b7" class="mono" font-size="9">Physical units</text>
+  <rect x="580" y="180" width="125" height="105" rx="8" fill="#111827" stroke="#10b981" stroke-width="1" />
+  <text x="590" y="202" fill="#10b981" class="mono" font-size="11" font-weight="700">2. DBC Scaling</text>
+  <text x="590" y="222" fill="#94a3b8" font-size="9.5">Scale factor</text>
+  <text x="590" y="238" fill="#94a3b8" font-size="9.5">Offset equations</text>
+  <text x="590" y="256" fill="#94a3b8" font-size="9.5">Min/Max clamp</text>
+  <text x="590" y="274" fill="#6ee7b7" class="mono" font-size="9">Physical units</text>
 
   <!-- Step Box 3: State Aggregator -->
-  <rect x="720" y="195" width="130" height="110" rx="8" fill="#111827" stroke="#10b981" stroke-width="1" />
-  <text x="730" y="217" fill="#10b981" class="mono" font-size="11" font-weight="700">3. Aggregate</text>
-  <text x="730" y="237" fill="#94a3b8" font-size="9.5">EngineSpeed</text>
-  <text x="730" y="253" fill="#94a3b8" font-size="9.5">VehicleSpeed</text>
-  <text x="730" y="271" fill="#94a3b8" font-size="9.5">Gear / Steering</text>
-  <text x="730" y="289" fill="#6ee7b7" class="mono" font-size="9">DTC Alerts</text>
+  <rect x="720" y="180" width="130" height="105" rx="8" fill="#111827" stroke="#10b981" stroke-width="1" />
+  <text x="730" y="202" fill="#10b981" class="mono" font-size="11" font-weight="700">3. Aggregate</text>
+  <text x="730" y="222" fill="#94a3b8" font-size="9.5">EngineSpeed</text>
+  <text x="730" y="238" fill="#94a3b8" font-size="9.5">VehicleSpeed</text>
+  <text x="730" y="256" fill="#94a3b8" font-size="9.5">Gear / Steering</text>
+  <text x="730" y="274" fill="#6ee7b7" class="mono" font-size="9">DTC Alerts</text>
 
   <!-- Step Connections -->
-  <path d="M 565 250 L 580 250" stroke="#10b981" stroke-width="1.5" marker-end="url(#arr-green)" />
-  <path d="M 705 250 L 720 250" stroke="#10b981" stroke-width="1.5" marker-end="url(#arr-green)" />
+  <path d="M 565 232 L 580 232" stroke="#10b981" stroke-width="1.5" marker-end="url(#arr-green)" />
+  <path d="M 705 232 L 720 232" stroke="#10b981" stroke-width="1.5" marker-end="url(#arr-green)" />
 
   <!-- Broadcaster Box (Bottom Center) -->
-  <rect x="440" y="325" width="410" height="108" rx="8" fill="#022c22" stroke="#10b981" stroke-width="1.8" />
-  <circle cx="830" cy="342" r="3.5" fill="#10b981" class="live-pulse" />
-  <text x="456" y="348" fill="#34d399" font-size="12" font-weight="700">Async WebSocket Broadcaster (server.py)</text>
-  <text x="456" y="369" fill="#a7f3d0" class="mono" font-size="10.5">ws://localhost:8080/ws • Telemetry feed @ 30-50 Hz</text>
-  <text x="456" y="388" fill="#94a3b8" font-size="10">Full duplex: broadcasts decoded JSON &amp; receives inject_frame commands</text>
-  <text x="456" y="405" fill="#6ee7b7" class="mono" font-size="9.5">aiohttp HTTP Server: hosts static frontend dashboard</text>
-  <text x="456" y="420" fill="#94a3b8" font-size="9">Connected clients: synchronized telemetry &amp; live rolling buffer</text>
+  <rect x="440" y="300" width="410" height="118" rx="8" fill="#022c22" stroke="#10b981" stroke-width="1.8" />
+  <circle cx="830" cy="317" r="3.5" fill="#10b981" class="live-pulse" />
+  <text x="456" y="322" fill="#34d399" font-size="12" font-weight="700">Async WebSocket Broadcaster (server.py)</text>
+  <text x="456" y="342" fill="#a7f3d0" class="mono" font-size="10.5">ws://localhost:8080/ws • Telemetry feed @ 30-50 Hz</text>
+  <text x="456" y="360" fill="#94a3b8" font-size="9.5">Full duplex: broadcasts decoded JSON &amp; receives inject_frame commands</text>
+  <text x="456" y="378" fill="#6ee7b7" class="mono" font-size="9">aiohttp HTTP Server: hosts static frontend dashboard</text>
+  <text x="456" y="394" fill="#94a3b8" font-size="9">Connected clients: synchronized telemetry &amp; live rolling buffer</text>
 
   <!-- ================= SUBGRAPH 4: CAN DATABASE (Right Box) ================= -->
-  <rect x="878" y="135" width="312" height="315" rx="12" fill="#170e2b" stroke="#a855f7" stroke-width="1.4" />
-  <circle cx="896" cy="155" r="4" fill="#a855f7" />
-  <text x="908" y="160" fill="#ffffff" font-size="13" font-weight="700">CAN Database (DBC)</text>
-  <text x="896" y="176" fill="#64748b" font-size="9.5">vehicle_base.dbc matrix specification</text>
+  <rect x="878" y="125" width="312" height="305" rx="12" fill="#170e2b" stroke="#a855f7" stroke-width="1.4" />
+  <circle cx="896" cy="145" r="4" fill="#a855f7" />
+  <text x="908" y="150" fill="#ffffff" font-size="13" font-weight="700">CAN Database (DBC)</text>
+  <text x="896" y="166" fill="#64748b" font-size="9.5">vehicle_base.dbc matrix specification</text>
 
   <!-- DBC Card 1 -->
-  <rect x="890" y="195" width="288" height="68" rx="8" fill="#111827" stroke="#1f293d" stroke-width="1" />
-  <text x="902" y="216" fill="#c084fc" class="mono" font-size="11" font-weight="700">0x100 Engine_Data</text>
-  <text x="902" y="233" fill="#94a3b8" font-size="9.5">EngineSpeed (RPM) • VehicleSpeed (km/h)</text>
-  <text x="902" y="249" fill="#64748b" font-size="9">ThrottlePosition (%) • EngineTemp (°C) • Oil (bar)</text>
+  <rect x="890" y="180" width="288" height="65" rx="8" fill="#111827" stroke="#1f293d" stroke-width="1" />
+  <text x="902" y="200" fill="#c084fc" class="mono" font-size="11" font-weight="700">0x100 Engine_Data</text>
+  <text x="902" y="217" fill="#94a3b8" font-size="9.5">EngineSpeed (RPM) • VehicleSpeed (km/h)</text>
+  <text x="902" y="233" fill="#64748b" font-size="9">ThrottlePosition (%) • EngineTemp (°C) • Oil (bar)</text>
 
   <!-- DBC Card 2 -->
-  <rect x="890" y="275" width="288" height="68" rx="8" fill="#111827" stroke="#1f293d" stroke-width="1" />
-  <text x="902" y="296" fill="#c084fc" class="mono" font-size="11" font-weight="700">0x200 Vehicle_Status</text>
-  <text x="902" y="313" fill="#94a3b8" font-size="9.5">FuelLevel (%) • BatterySOC (%) • Gear (PRNDS)</text>
-  <text x="902" y="329" fill="#64748b" font-size="9">SteeringAngle (deg) • TurnSignals • Headlights</text>
+  <rect x="890" y="255" width="288" height="65" rx="8" fill="#111827" stroke="#1f293d" stroke-width="1" />
+  <text x="902" y="275" fill="#c084fc" class="mono" font-size="11" font-weight="700">0x200 Vehicle_Status</text>
+  <text x="902" y="292" fill="#94a3b8" font-size="9.5">FuelLevel (%) • BatterySOC (%) • Gear (PRNDS)</text>
+  <text x="902" y="308" fill="#64748b" font-size="9">SteeringAngle (deg) • TurnSignals • Headlights</text>
 
   <!-- DBC Card 3 -->
-  <rect x="890" y="355" width="288" height="78" rx="8" fill="#111827" stroke="#1f293d" stroke-width="1" />
-  <text x="902" y="376" fill="#c084fc" class="mono" font-size="11" font-weight="700">0x300 Diagnostics_Alerts</text>
-  <text x="902" y="393" fill="#94a3b8" font-size="9.5">CheckEngineLight (MIL) • BatteryWarning</text>
-  <text x="902" y="408" fill="#64748b" font-size="9">TirePressureWarning (TPMS) • ABSWarning</text>
-  <text x="902" y="422" fill="#64748b" font-size="9">Odometer (km)</text>
+  <rect x="890" y="330" width="288" height="88" rx="8" fill="#111827" stroke="#1f293d" stroke-width="1" />
+  <text x="902" y="350" fill="#c084fc" class="mono" font-size="11" font-weight="700">0x300 Diagnostics_Alerts</text>
+  <text x="902" y="367" fill="#94a3b8" font-size="9.5">CheckEngineLight (MIL) • BatteryWarning</text>
+  <text x="902" y="382" fill="#64748b" font-size="9">TirePressureWarning (TPMS) • ABSWarning</text>
+  <text x="902" y="396" fill="#64748b" font-size="9">Odometer (km)</text>
 
-  <!-- ================= SUBGRAPH 5: ACTIVE FRONTEND WORKBENCH (Bottom Row) ================= -->
+  <!-- ================= SUBGRAPH 5: ACTIVE FRONTEND WORKBENCH & 3D DIGITAL TWIN (Bottom Row) ================= -->
   <!-- Outer highlight box for active area -->
-  <rect x="48" y="465" width="1144" height="180" rx="14" fill="rgba(0, 240, 255, 0.03)" stroke="#00f0ff" stroke-width="2" class="active-border-glow" />
+  <rect x="48" y="455" width="1144" height="315" rx="14" fill="rgba(0, 240, 255, 0.03)" stroke="#00f0ff" stroke-width="2" class="active-border-glow" />
 
   <!-- Active Area Badge -->
-  <rect x="68" y="455" width="280" height="22" rx="4" fill="#032b38" stroke="#00f0ff" stroke-width="1" />
-  <text x="208" y="470" fill="#00f0ff" class="mono" font-size="10" font-weight="800" text-anchor="middle" letter-spacing="1">
-    ⚡ ACTIVE WORKBENCH SUITE · v2.4 PRO
+  <rect x="68" y="443" width="370" height="24" rx="4" fill="#032b38" stroke="#00f0ff" stroke-width="1" />
+  <text x="253" y="459" fill="#00f0ff" class="mono" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="1">
+    ⚡ ACTIVE WORKBENCH &amp; 3D SIMULATION SUITE
   </text>
 
-  <!-- Module 1: Cockpit Cluster -->
-  <rect x="64" y="488" width="260" height="142" rx="10" fill="#0f172a" stroke="#00f0ff" stroke-width="1.2" />
-  <circle cx="80" cy="508" r="3.5" fill="#00f0ff" />
-  <text x="92" y="513" fill="#38bdf8" font-size="12" font-weight="700">🚀 Cockpit Cluster HUD</text>
-  <text x="76" y="534" fill="#ffffff" font-size="11" font-weight="600">SVG Tachometer &amp; Speedometer</text>
-  <text x="76" y="552" fill="#94a3b8" font-size="9.5">• Swept needle &amp; gradient redline</text>
-  <text x="76" y="568" fill="#94a3b8" font-size="9.5">• Rotating wheel chassis kinematics</text>
-  <text x="76" y="584" fill="#94a3b8" font-size="9.5">• 4-Wheel TPMS pressure indicators</text>
-  <text x="76" y="600" fill="#94a3b8" font-size="9.5">• Telltale warning rack (MIL, ABS, Batt)</text>
-  <text x="76" y="618" fill="#38bdf8" class="mono" font-size="9">PRNDS Transmission Selector</text>
+  <!-- Module 1: 3D DIGITAL TWIN (Major Highlighted Feature Card) -->
+  <rect x="64" y="480" width="360" height="270" rx="10" fill="#071124" stroke="#00f0ff" stroke-width="1.8" />
+  <circle cx="82" cy="502" r="4.5" fill="#00f0ff" class="live-pulse" />
+  <text x="95" y="507" fill="#00f0ff" font-size="13.5" font-weight="800">🚗 3D Vehicle Digital Twin &amp; Physics</text>
+  <text x="78" y="528" fill="#ffffff" font-size="11" font-weight="700">Three.js WebGL &amp; Rapier3D WASM (60 Hz)</text>
+  
+  <text x="78" y="550" fill="#a5f3fc" class="mono" font-size="9.5">• PBR Clearcoat Paint &amp; Soft Shadow Maps (2048x2048)</text>
+  <text x="78" y="567" fill="#94a3b8" font-size="9.5">• 4-Wheel Independent Raycast Suspension (k=34 kN/m)</text>
+  <text x="78" y="584" fill="#94a3b8" font-size="9.5">• Ackermann Steering Geometry &amp; Dynamic Wheel Angles</text>
+  <text x="78" y="601" fill="#94a3b8" font-size="9.5">• Pacejka 'Magic Formula' Tire Cornering &amp; Handbrake Drift</text>
+  <text x="78" y="618" fill="#94a3b8" font-size="9.5">• 6-Speed Dual-Clutch Transmission &amp; Limited-Slip Diff (LSD)</text>
+  <text x="78" y="635" fill="#94a3b8" font-size="9.5">• Weight Transfer Dynamics: Acceleration Squat &amp; Dive Pitch</text>
+  <text x="78" y="652" fill="#34d399" font-weight="700" font-size="9.5">• Dual Modes: Virtual Driving (WASD) ↔ CAN Replay Sync</text>
+  <text x="78" y="669" fill="#38bdf8" class="mono" font-size="9.5">• 25 Hz Binary Serialization to 0x100 &amp; 0x200 over ws://</text>
+  
+  <!-- Camera pills inside 3D card -->
+  <rect x="78" y="685" width="330" height="24" rx="4" fill="#032b38" stroke="#00f0ff" stroke-width="0.8" />
+  <text x="88" y="701" fill="#a5f3fc" class="mono" font-size="9">CAMERAS: Chase Follow • Free Orbit • Cockpit View</text>
+  
+  <rect x="78" y="718" width="330" height="22" rx="4" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" stroke-width="0.8" />
+  <text x="88" y="733" fill="#6ee7b7" class="mono" font-size="9">CONTROLS: WASD / Arrows • Space (Handbrake) • R (Reset)</text>
 
-  <!-- Module 2: Oscilloscope -->
-  <rect x="340" y="488" width="265" height="142" rx="10" fill="#0f172a" stroke="#00f0ff" stroke-width="1.2" />
-  <circle cx="356" cy="508" r="3.5" fill="#00f0ff" />
-  <text x="368" y="513" fill="#38bdf8" font-size="12" font-weight="700">📈 60 FPS Oscilloscope</text>
-  <text x="352" y="534" fill="#ffffff" font-size="11" font-weight="600">Canvas Multi-Trace Waveforms</text>
-  <text x="352" y="552" fill="#94a3b8" font-size="9.5">• Real-time rolling graph buffer</text>
-  <text x="352" y="568" fill="#94a3b8" font-size="9.5">• Traces: RPM, Speed, Throttle, Temp</text>
-  <text x="352" y="584" fill="#94a3b8" font-size="9.5">• Freeze / Unfreeze canvas controls</text>
-  <text x="352" y="600" fill="#94a3b8" font-size="9.5">• Timespan zoom: 10s, 20s, 40s window</text>
-  <text x="352" y="618" fill="#38bdf8" class="mono" font-size="9">Peak &amp; Average stats calculation</text>
+  <!-- Module 2: Cockpit Cluster -->
+  <rect x="440" y="480" width="235" height="128" rx="10" fill="#0f172a" stroke="#00f0ff" stroke-width="1.2" />
+  <circle cx="456" cy="498" r="3.5" fill="#00f0ff" />
+  <text x="468" y="503" fill="#38bdf8" font-size="11.5" font-weight="700">🚀 Cockpit Cluster HUD</text>
+  <text x="452" y="522" fill="#ffffff" font-size="10.5" font-weight="600">SVG Tachometer &amp; Speedometer</text>
+  <text x="452" y="538" fill="#94a3b8" font-size="9">• Swept needle &amp; gradient redline</text>
+  <text x="452" y="552" fill="#94a3b8" font-size="9">• 4-Wheel TPMS pressure indicators</text>
+  <text x="452" y="566" fill="#94a3b8" font-size="9">• Telltale warnings (MIL, ABS, Batt)</text>
+  <text x="452" y="580" fill="#38bdf8" class="mono" font-size="8.5">PRNDS Transmission Display</text>
 
-  <!-- Module 3: Bus Inspector -->
-  <rect x="620" y="488" width="265" height="142" rx="10" fill="#0f172a" stroke="#00f0ff" stroke-width="1.2" />
-  <circle cx="636" cy="508" r="3.5" fill="#00f0ff" />
-  <text x="648" y="513" fill="#38bdf8" font-size="12" font-weight="700">🔍 CAN Bus Frame Inspector</text>
-  <text x="632" y="534" fill="#ffffff" font-size="11" font-weight="600">Wireshark-Style Tabular Stream</text>
-  <text x="632" y="552" fill="#94a3b8" font-size="9.5">• Byte-by-byte visual coloring (0..7)</text>
-  <text x="632" y="568" fill="#94a3b8" font-size="9.5">• Live ID filtering (0x100, 0x200, 0x300)</text>
-  <text x="632" y="584" fill="#94a3b8" font-size="9.5">• Instant search across hex payloads</text>
-  <text x="632" y="600" fill="#34d399" font-weight="700" font-size="9.5">• 💾 Export Log to CSV</text>
-  <text x="632" y="618" fill="#38bdf8" class="mono" font-size="9">Bus Load % &amp; Packet Rate HUD</text>
+  <!-- Module 3: Oscilloscope -->
+  <rect x="690" y="480" width="240" height="128" rx="10" fill="#0f172a" stroke="#00f0ff" stroke-width="1.2" />
+  <circle cx="706" cy="498" r="3.5" fill="#00f0ff" />
+  <text x="718" y="503" fill="#38bdf8" font-size="11.5" font-weight="700">📈 60 FPS Oscilloscope</text>
+  <text x="702" y="522" fill="#ffffff" font-size="10.5" font-weight="600">Multi-Trace Rolling Waveforms</text>
+  <text x="702" y="538" fill="#94a3b8" font-size="9">• Real-time HTML5 Canvas buffer</text>
+  <text x="702" y="552" fill="#94a3b8" font-size="9">• Traces: RPM, Speed, Throttle, Temp</text>
+  <text x="702" y="566" fill="#94a3b8" font-size="9">• Freeze canvas &amp; timespan zoom</text>
+  <text x="702" y="580" fill="#38bdf8" class="mono" font-size="8.5">Peak &amp; Avg Telemetry Metrics</text>
 
-  <!-- Module 4: ECU Injector -->
-  <rect x="900" y="488" width="276" height="142" rx="10" fill="#0f172a" stroke="#f59e0b" stroke-width="1.4" />
-  <circle cx="916" cy="508" r="3.5" fill="#f59e0b" />
-  <text x="928" y="513" fill="#fbbf24" font-size="12" font-weight="700">🕹️ ECU Injector &amp; Faults</text>
-  <text x="912" y="534" fill="#ffffff" font-size="11" font-weight="600">Manual Bus Packet Injection</text>
-  <text x="912" y="552" fill="#94a3b8" font-size="9.5">• RPM, Speed, Throttle sliders &amp; presets</text>
-  <text x="912" y="568" fill="#f87171" font-weight="700" font-size="9.5">• DTC Triggers: MIL, TPMS, Batt, ABS</text>
-  <text x="912" y="584" fill="#94a3b8" font-size="9.5">• Arbitrary hex frame transmitter</text>
-  <text x="912" y="600" fill="#94a3b8" font-size="9.5">• Console terminal with frame ACKs</text>
-  <text x="912" y="618" fill="#a855f7" class="mono" font-size="9">Themes: COMFORT | SPORT | ECO | CYBER</text>
+  <!-- Module 4: Bus Inspector -->
+  <rect x="945" y="480" width="235" height="128" rx="10" fill="#0f172a" stroke="#00f0ff" stroke-width="1.2" />
+  <circle cx="961" cy="498" r="3.5" fill="#00f0ff" />
+  <text x="973" y="503" fill="#38bdf8" font-size="11.5" font-weight="700">🔍 CAN Bus Frame Inspector</text>
+  <text x="957" y="522" fill="#ffffff" font-size="10.5" font-weight="600">Wireshark-Style Tabular Stream</text>
+  <text x="957" y="538" fill="#94a3b8" font-size="9">• Byte visual coloring (bytes 0..7)</text>
+  <text x="957" y="552" fill="#94a3b8" font-size="9">• Live ID filtering (0x100, 0x200, 0x300)</text>
+  <text x="957" y="566" fill="#34d399" font-weight="700" font-size="9">• 💾 Instant Export to CSV</text>
+  <text x="957" y="580" fill="#38bdf8" class="mono" font-size="8.5">Bus Load % &amp; Packet Rate HUD</text>
+
+  <!-- Module 5: ECU Injector & Themes (Bottom Span) -->
+  <rect x="440" y="622" width="740" height="128" rx="10" fill="#0f172a" stroke="#f59e0b" stroke-width="1.4" />
+  <circle cx="456" cy="640" r="3.5" fill="#f59e0b" />
+  <text x="468" y="645" fill="#fbbf24" font-size="12" font-weight="700">🕹️ ECU Injector, DTC Diagnostics &amp; Ambient Drive Themes</text>
+  <text x="452" y="666" fill="#ffffff" font-size="11" font-weight="600">Bidirectional Telemetry Override &amp; Fault Simulator</text>
+  <text x="452" y="684" fill="#94a3b8" font-size="9.5">• Manual sliders &amp; preset overrides for EngineSpeed (RPM), VehicleSpeed (km/h), Throttle (%) &amp; EngineTemp</text>
+  <text x="452" y="700" fill="#f87171" font-weight="700" font-size="9.5">• One-click DTC Warning Triggers: Check Engine (MIL), Battery Charge, Low TPMS, and ABS Brake Malfunction</text>
+  <text x="452" y="716" fill="#94a3b8" font-size="9.5">• Diagnostic Console Terminal with live raw transmission ACKs, error logs, and DBC bitfield inspections</text>
+  <text x="452" y="734" fill="#c084fc" class="mono" font-size="9">Dynamic Drive Modes: 🌊 COMFORT (Cyan) | 🏁 SPORT (Crimson) | 🌿 ECO (Emerald) | ⚡ CYBER (Neon Violet)</text>
 
   <!-- ================= ANIMATED FLOW CONNECTORS (ActionCloud/Archify Style) ================= -->
 
   <!-- 1. canplayer to vcan0 (Amber flow) -->
-  <path d="M 220 395 L 260 270" fill="none" stroke="#f59e0b" stroke-width="2.5" class="flow-amber" marker-end="url(#arr-amber)" />
-  <rect x="208" y="325" width="54" height="18" rx="4" fill="#080c18" stroke="#f59e0b" stroke-width="0.8" />
-  <text x="235" y="338" fill="#fbbf24" class="mono" font-size="8.5" text-anchor="middle">50 Hz</text>
+  <path d="M 220 375 L 260 250" fill="none" stroke="#f59e0b" stroke-width="2.5" class="flow-amber" marker-end="url(#arr-amber)" />
+  <rect x="208" y="305" width="54" height="18" rx="4" fill="#080c18" stroke="#f59e0b" stroke-width="0.8" />
+  <text x="235" y="318" fill="#fbbf24" class="mono" font-size="8.5" text-anchor="middle">50 Hz</text>
 
   <!-- 2. vcan0 to Decoder (Cyan flow) -->
-  <path d="M 401 250 L 440 250" fill="none" stroke="#00f0ff" stroke-width="2.5" class="flow-cyan" marker-end="url(#arr-cyan)" />
-  <rect x="398" y="238" width="46" height="18" rx="4" fill="#080c18" stroke="#00f0ff" stroke-width="0.8" />
-  <text x="421" y="251" fill="#00f0ff" class="mono" font-size="8.5" text-anchor="middle">SocketCAN</text>
+  <path d="M 401 235 L 440 235" fill="none" stroke="#00f0ff" stroke-width="2.5" class="flow-cyan" marker-end="url(#arr-cyan)" />
+  <rect x="398" y="223" width="46" height="18" rx="4" fill="#080c18" stroke="#00f0ff" stroke-width="0.8" />
+  <text x="421" y="236" fill="#00f0ff" class="mono" font-size="8.5" text-anchor="middle">SocketCAN</text>
 
   <!-- 3. DBC to Decoder (Purple dashed line) -->
-  <path d="M 878 250 L 850 250" fill="none" stroke="#c084fc" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#arr-purple)" />
-  <rect x="850" y="238" width="30" height="18" rx="4" fill="#080c18" stroke="#c084fc" stroke-width="0.8" />
-  <text x="865" y="251" fill="#c084fc" class="mono" font-size="8.5" text-anchor="middle">DBC</text>
+  <path d="M 878 235 L 850 235" fill="none" stroke="#c084fc" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#arr-purple)" />
+  <rect x="850" y="223" width="30" height="18" rx="4" fill="#080c18" stroke="#c084fc" stroke-width="0.8" />
+  <text x="865" y="236" fill="#c084fc" class="mono" font-size="8.5" text-anchor="middle">DBC</text>
 
   <!-- 4. Broadcaster to Frontend Workbench (Green flow down) -->
-  <path d="M 645 433 L 645 488" fill="none" stroke="#10b981" stroke-width="2.5" class="flow-green" marker-end="url(#arr-green)" />
-  <rect x="600" y="450" width="90" height="18" rx="4" fill="#080c18" stroke="#10b981" stroke-width="0.8" />
-  <text x="645" y="463" fill="#34d399" class="mono" font-size="8.5" text-anchor="middle">JSON @ 30Hz</text>
+  <path d="M 645 418 L 645 480" fill="none" stroke="#10b981" stroke-width="2.5" class="flow-green" marker-end="url(#arr-green)" />
+  <rect x="600" y="440" width="90" height="18" rx="4" fill="#080c18" stroke="#10b981" stroke-width="0.8" />
+  <text x="645" y="453" fill="#34d399" class="mono" font-size="8.5" text-anchor="middle">JSON @ 30-50Hz</text>
 
-  <!-- 5. ECU Injector back to vcan0 (Reverse Amber flow) -->
-  <path d="M 1038 488 C 1038 450, 480 470, 380 310" fill="none" stroke="#f59e0b" stroke-width="2" class="flow-amber-rev" marker-end="url(#arr-amber)" />
-  <rect x="680" y="450" width="92" height="18" rx="4" fill="#080c18" stroke="#f59e0b" stroke-width="0.8" />
-  <text x="726" y="463" fill="#fbbf24" class="mono" font-size="8.5" text-anchor="middle">inject_frame (Hex)</text>
+  <!-- 5. 3D Digital Twin Bidirectional CAN Injection (Cyan loop back to vcan0) -->
+  <path d="M 244 480 C 244 430, 290 350, 310 295" fill="none" stroke="#00f0ff" stroke-width="2.5" class="flow-cyan" marker-end="url(#arr-cyan)" />
+  <rect x="238" y="375" width="105" height="18" rx="4" fill="#080c18" stroke="#00f0ff" stroke-width="0.8" />
+  <text x="290" y="388" fill="#00f0ff" class="mono" font-size="8.5" text-anchor="middle">3D TX: 25Hz CAN</text>
+
+  <!-- 6. Replay Sync from vcan0/Broadcaster to 3D Digital Twin (Reverse Amber flow) -->
+  <path d="M 440 370 C 370 390, 340 430, 340 480" fill="none" stroke="#f59e0b" stroke-width="2" class="flow-amber" marker-end="url(#arr-amber)" />
+  <rect x="330" y="415" width="95" height="18" rx="4" fill="#080c18" stroke="#f59e0b" stroke-width="0.8" />
+  <text x="377" y="428" fill="#fbbf24" class="mono" font-size="8.5" text-anchor="middle">3D RX: Replay Sync</text>
 
   <!-- ================= BOTTOM DEPLOYMENT MODES CONTAINER ================= -->
-  <rect x="35" y="680" width="1170" height="130" rx="14" fill="#0b1122" stroke="#1e293b" stroke-width="1.5" />
+  <rect x="35" y="805" width="1170" height="130" rx="14" fill="#0b1122" stroke="#1e293b" stroke-width="1.5" />
   
-  <text x="55" y="706" fill="#ffffff" font-size="13.5" font-weight="700">Same automotive emulator workflow - two deployment modes</text>
+  <text x="55" y="831" fill="#ffffff" font-size="13.5" font-weight="700">Same automotive emulator workflow · Two flexible execution environments</text>
 
   <!-- Left Deployment Box: Local -->
-  <rect x="55" y="722" width="545" height="74" rx="8" fill="#0f172a" stroke="#10b981" stroke-width="1.2" />
-  <text x="75" y="744" fill="#34d399" class="mono" font-size="12" font-weight="700">LOCAL - laptop &amp; WSL2 demo</text>
-  <text x="75" y="763" fill="#ffffff" font-size="11">Single command: scripts\run_demo.bat (Windows) or ./scripts/run_demo.sh (Linux/macOS)</text>
-  <text x="75" y="780" fill="#94a3b8" class="mono" font-size="10">Built-in virtual bus fallback • No root/kernel compilation required • Instant web UI</text>
+  <rect x="55" y="847" width="545" height="74" rx="8" fill="#0f172a" stroke="#10b981" stroke-width="1.2" />
+  <text x="75" y="869" fill="#34d399" class="mono" font-size="12" font-weight="700">LOCAL - Windows, macOS &amp; WSL2 (Zero-Setup Demo)</text>
+  <text x="75" y="888" fill="#ffffff" font-size="11">Single command: scripts\run_demo.bat (Windows) or ./scripts/run_demo.sh (Linux/macOS)</text>
+  <text x="75" y="905" fill="#94a3b8" class="mono" font-size="10">Built-in virtual bus fallback • No root/kernel compilation required • Instant 3D simulation</text>
 
   <!-- Right Deployment Box: Production -->
-  <rect x="620" y="722" width="565" height="74" rx="8" fill="#0f172a" stroke="#818cf8" stroke-width="1.2" />
-  <text x="640" y="744" fill="#a5b4fc" class="mono" font-size="12" font-weight="700">LINUX PRODUCTION - host &amp; VM deployment</text>
-  <text x="640" y="763" fill="#ffffff" font-size="11">Kernel vcan module + systemd background daemon (/etc/systemd/system/opentwin.service)</text>
-  <text x="640" y="780" fill="#94a3b8" class="mono" font-size="10">High-speed canplayer log broadcast • Full SocketCAN stack • Automated healthchecks</text>
+  <rect x="620" y="847" width="565" height="74" rx="8" fill="#0f172a" stroke="#818cf8" stroke-width="1.2" />
+  <text x="640" y="869" fill="#a5b4fc" class="mono" font-size="12" font-weight="700">LINUX PRODUCTION - Host &amp; VM SocketCAN Daemon</text>
+  <text x="640" y="888" fill="#ffffff" font-size="11">Kernel vcan module + systemd background daemon (/etc/systemd/system/opentwin.service)</text>
+  <text x="640" y="905" fill="#94a3b8" class="mono" font-size="10">High-speed canplayer log broadcast • Full SocketCAN stack • Automated healthchecks</text>
 
 </svg>
