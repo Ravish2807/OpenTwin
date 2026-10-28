@@ -314,4 +314,9 @@ export class VehicleRig {
     this.wheelRL.position.y = rlY;
     this.wheelRR.position.y = rrY;
   }
+
+  setBodyPitchRoll(pitch, roll) {
+    this.chassisGroup.rotation.x = pitch;
+    this.chassisGroup.rotation.z = roll;
+  }
 }

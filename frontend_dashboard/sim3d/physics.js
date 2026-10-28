@@ -47,6 +47,14 @@ export class PhysicsEngine {
     this.forwardSpeedKmh = 0.0;
     this.isReversing = false;
 
+    // Weight Transfer & Kinematic Roll/Pitch Dynamics (Phase 3.3)
+    this.cgHeight = 0.48; // Center of gravity height (meters)
+    this.prevForwardSpeed = 0.0;
+    this.longitudinalAccel = 0.0; // m/s^2
+    this.lateralAccel = 0.0;      // m/s^2
+    this.chassisPitch = 0.0;      // Radians
+    this.chassisRoll = 0.0;       // Radians
+
     // Pacejka 'Magic Formula' standard tire coefficients (Dry asphalt)
     this.pacejkaB = 10.0;   // Stiffness factor
     this.pacejkaC = 1.65;   // Shape factor
@@ -129,6 +137,13 @@ export class PhysicsEngine {
     this.engineRpm = 850.0;
     this.gear = 1;
     this.isReversing = false;
+    this.longitudinalAccel = 0.0;
+    this.lateralAccel = 0.0;
+    this.chassisPitch = 0.0;
+    this.chassisRoll = 0.0;
+    if (this.vehicleRig) {
+      this.vehicleRig.setBodyPitchRoll(0.0, 0.0);
+    }
     console.log("[Physics] Vehicle reset to starting grid.");
   }
 
@@ -268,7 +283,30 @@ export class PhysicsEngine {
     const forwardSpeed = cLinvel.dot(chassisFwd);
     this.forwardSpeedKmh = forwardSpeed * 3.6;
 
-    // 1. Automatic Gearbox shifting & dual-clutch state (Phase 3.2)
+    // 1. Weight Transfer & Acceleration Dynamics (Phase 3.3)
+    const rawAx = (forwardSpeed - this.prevForwardSpeed) / Math.max(dt, 0.001);
+    this.longitudinalAccel = THREE.MathUtils.lerp(this.longitudinalAccel, rawAx, dt * 8.0);
+    this.prevForwardSpeed = forwardSpeed;
+
+    const yawRate = cAngvel.y;
+    const rawAy = forwardSpeed * yawRate;
+    this.lateralAccel = THREE.MathUtils.lerp(this.lateralAccel, rawAy, dt * 8.0);
+
+    // Delta normal load from longitudinal and lateral weight transfer
+    const deltaFzLong = (this.vehicleMass * this.longitudinalAccel * this.cgHeight) / this.wheelbase;
+    const deltaFzLat = (this.vehicleMass * this.lateralAccel * this.cgHeight) / this.trackWidth;
+
+    // Kinematic Chassis Pitch (Squat/Dive) and Roll (Lean)
+    const targetPitch = THREE.MathUtils.clamp(-this.longitudinalAccel * 0.0035, -0.05, 0.05);
+    const targetRoll = THREE.MathUtils.clamp(this.lateralAccel * 0.004, -0.07, 0.07);
+    this.chassisPitch = THREE.MathUtils.lerp(this.chassisPitch, targetPitch, dt * 7.0);
+    this.chassisRoll = THREE.MathUtils.lerp(this.chassisRoll, targetRoll, dt * 7.0);
+
+    if (this.vehicleRig) {
+      this.vehicleRig.setBodyPitchRoll(this.chassisPitch, this.chassisRoll);
+    }
+
+    // 2. Automatic Gearbox shifting & dual-clutch state (Phase 3.2)
     const shiftState = this.gearbox.update(dt, this.engineRpm, controls.throttle, controls.brake, forwardSpeed);
     this.gear = this.gearbox.currentGear;
     this.isReversing = (this.gear === -1);
@@ -325,8 +363,16 @@ export class PhysicsEngine {
       // Slip angle alpha = atan(vLat / (|vLong| + 0.1))
       const slipAngle = Math.atan2(vLat, Math.abs(vLong) + 0.2);
 
+      // Weight transfer dynamic normal load adjustment (Phase 3.3)
+      let effNormal = wheel.normalForce;
+      if (wheel.id === 'FL') effNormal += (-deltaFzLong * 0.5 - deltaFzLat * 0.5);
+      else if (wheel.id === 'FR') effNormal += (-deltaFzLong * 0.5 + deltaFzLat * 0.5);
+      else if (wheel.id === 'RL') effNormal += (deltaFzLong * 0.5 - deltaFzLat * 0.5);
+      else if (wheel.id === 'RR') effNormal += (deltaFzLong * 0.5 + deltaFzLat * 0.5);
+      effNormal = Math.max(120, effNormal);
+
       // 1. Lateral Force from Pacejka Formula
-      let fLat = this.pacejkaLateralForce(slipAngle, wheel.normalForce);
+      let fLat = this.pacejkaLateralForce(slipAngle, effNormal);
 
       // Handbrake drift multiplier on rear wheels
       if (controls.handbrake && !wheel.isFront) {
@@ -350,7 +396,7 @@ export class PhysicsEngine {
       }
 
       // 3. Friction Circle Clamping: sqrt(Fx^2 + Fy^2) <= mu * Fz
-      const maxTireGrip = this.pacejkaD * wheel.normalForce;
+      const maxTireGrip = this.pacejkaD * effNormal;
       const totalF = Math.sqrt(fLong * fLong + fLat * fLat);
       if (totalF > maxTireGrip && totalF > 0) {
         const scale = maxTireGrip / totalF;
