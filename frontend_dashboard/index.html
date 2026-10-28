@@ -706,6 +706,16 @@
       if (btnChase) btnChase.addEventListener('click', () => selectCam(btnChase, 'chase'));
       if (btnOrbit) btnOrbit.addEventListener('click', () => selectCam(btnOrbit, 'orbit'));
       if (btnCockpit) btnCockpit.addEventListener('click', () => selectCam(btnCockpit, 'cockpit'));
+
+      // Bind Simulation / Replay mode toggle (Phase 4.2)
+      const btnToggleMode = document.getElementById('btn-toggle-sim-mode');
+      if (btnToggleMode) {
+        btnToggleMode.addEventListener('click', () => {
+          if (window.sim3d && window.sim3d.canBridge) {
+            window.sim3d.canBridge.toggleMode();
+          }
+        });
+      }
     });
   </script>
 </body>

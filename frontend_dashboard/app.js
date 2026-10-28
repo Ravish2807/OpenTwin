@@ -712,6 +712,7 @@ function connectWebSocket() {
       if (msg.type === "telemetry") {
         const data = msg.data;
         updateCockpit(data);
+        if (window.sim3d && window.sim3d.canBridge) window.sim3d.canBridge.handleIncomingTelemetry(data);
 
         // Append to Oscilloscope rolling buffer
         const nowSec = performance.now() / 1000;

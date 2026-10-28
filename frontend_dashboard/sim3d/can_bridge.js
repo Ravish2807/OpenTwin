@@ -3,6 +3,8 @@
  * Phase 4.1 & 4.2 — CAN Frame Serialization, 3D Injector & Replay Synchronization
  */
 
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
 export class CANBridge {
   constructor(simEngine) {
     this.simEngine = simEngine;
@@ -12,6 +14,7 @@ export class CANBridge {
     this.txTimer = 0.0;
     this.txInterval = 1.0 / this.txRateHz;
     this.frameCount = 0;
+    this.lastTelemetryTime = performance.now();
 
     // Status callback
     this.onStatusChange = null;
@@ -24,9 +27,37 @@ export class CANBridge {
   setInjectionMode(enabled) {
     this.injectionMode = enabled;
     console.log(`[CANBridge] Operating Mode: ${this.injectionMode ? "3D Simulator (TX)" : "Replay Receiver (RX)"}`);
+    
+    const hudCan = document.getElementById('hud-3d-can-tx');
+    const toggleBtn = document.getElementById('btn-toggle-sim-mode');
+
+    if (this.injectionMode) {
+      if (hudCan) {
+        hudCan.innerText = "TX ACTIVE (25Hz)";
+        hudCan.className = "hud-stat-num cyan";
+      }
+      if (toggleBtn) {
+        toggleBtn.innerText = "🎮 Virtual Drive (WASD)";
+        toggleBtn.className = "btn btn-sm btn-primary";
+      }
+    } else {
+      if (hudCan) {
+        hudCan.innerText = "RX SYNCED (REPLAY)";
+        hudCan.className = "hud-stat-num amber";
+      }
+      if (toggleBtn) {
+        toggleBtn.innerText = "📡 CAN Replay Sync Mode";
+        toggleBtn.className = "btn btn-sm btn-outline";
+      }
+    }
+
     if (this.onStatusChange) {
       this.onStatusChange(this.injectionMode);
     }
+  }
+
+  toggleMode() {
+    this.setInjectionMode(!this.injectionMode);
   }
 
   /**
@@ -61,7 +92,6 @@ export class CANBridge {
     const fuelRaw = Math.floor(fuelPct / 0.5) & 0xFF;
     const battRaw = Math.floor(battPct / 0.5) & 0xFF;
 
-    // Map gear: -1 (R) -> 1, 1..6 -> 3..8
     let dbcGear = 3;
     if (gearNum === -1) dbcGear = 1; // Reverse
     else if (gearNum === 0) dbcGear = 0; // Park
@@ -69,7 +99,6 @@ export class CANBridge {
 
     const byte2 = (dbcGear & 0x0F) | ((isBraking ? 1 : 0) << 4) | ((turnSignal & 0x07) << 5);
 
-    // Signed 16-bit steering angle
     const steerRaw = Math.floor(steeringAngleDeg / 0.1);
     const steerBytes = new Int16Array([steerRaw]);
     const u8 = new Uint8Array(steerBytes.buffer);
@@ -79,7 +108,7 @@ export class CANBridge {
     const b2 = byte2;
     const b3 = u8[0];
     const b4 = u8[1];
-    const b5 = 1; // Headlights active
+    const b5 = 1;
     const b6 = 0;
     const b7 = 0;
 
@@ -130,11 +159,70 @@ export class CANBridge {
         hex_data: hexStatus
       }));
 
-      // Update HUD CAN Indicator
       const hudCan = document.getElementById('hud-3d-can-tx');
       if (hudCan) {
         hudCan.innerText = `CAN TX: 0x100, 0x200 (#${this.frameCount})`;
-        hudCan.className = "hud-stat-val tx-pulse";
+        hudCan.className = "hud-stat-num cyan";
+      }
+    }
+  }
+
+  /**
+   * Phase 4.2 — Replay Synchronization Mode:
+   * Translates incoming CAN telemetry frames into realistic 3D vehicle motion and visuals.
+   */
+  handleIncomingTelemetry(data) {
+    if (this.injectionMode || !this.simEngine || !this.simEngine.vehicleRig) {
+      return;
+    }
+
+    const now = performance.now();
+    const dt = Math.min((now - this.lastTelemetryTime) / 1000.0, 0.1);
+    this.lastTelemetryTime = now;
+
+    const speedKmh = Number(data.VehicleSpeed || 0);
+    const rpm = Number(data.EngineSpeed || 850);
+    const steerDeg = Number(data.SteeringAngle || 0);
+    const brakeActive = Boolean(data.BrakeActive);
+    const gear = data.Gear ?? 'D';
+
+    const speedMs = speedKmh / 3.6;
+    const steerRad = (steerDeg * Math.PI) / 180.0;
+
+    // Kinematic bicycle vehicle advance
+    const vehicle = this.simEngine.vehicleGroup;
+    if (vehicle) {
+      const yawRate = (speedMs / 2.6) * Math.tan(steerRad * 0.45);
+      vehicle.rotation.y += yawRate * dt;
+
+      const forwardVec = new THREE.Vector3(0, 0, 1).applyQuaternion(vehicle.quaternion);
+      vehicle.position.addScaledVector(forwardVec, speedMs * dt);
+
+      // Spin visual wheels and apply steering
+      const spinDelta = (speedMs / 0.34) * dt;
+      this.simEngine.vehicleRig.spinWheels(spinDelta);
+      this.simEngine.vehicleRig.setSteering(steerRad * 0.45, steerRad * 0.45);
+      this.simEngine.vehicleRig.setBraking(brakeActive);
+
+      // Pitch & Roll kinematic lean from speed & steering
+      const pitch = THREE.MathUtils.clamp((brakeActive ? 0.03 : -0.015 * (speedMs / 40)), -0.05, 0.05);
+      const roll = THREE.MathUtils.clamp(steerRad * 0.08 * (speedMs / 25), -0.07, 0.07);
+      this.simEngine.vehicleRig.setBodyPitchRoll(pitch, roll);
+
+      // Update 3D HUD telemetry
+      const speedElem = document.getElementById('hud-3d-speed');
+      const rpmElem = document.getElementById('hud-3d-rpm');
+      const gearElem = document.getElementById('hud-3d-gear');
+      const steerElem = document.getElementById('hud-3d-steer');
+      const hudCan = document.getElementById('hud-3d-can-tx');
+
+      if (speedElem) speedElem.innerHTML = `${Math.round(speedKmh)}<span class="unit">KM/H</span>`;
+      if (rpmElem) rpmElem.innerText = `${Math.round(rpm)}`;
+      if (gearElem) gearElem.innerText = `${gear}`;
+      if (steerElem) steerElem.innerText = `${steerDeg.toFixed(1)}°`;
+      if (hudCan) {
+        hudCan.innerText = "CAN RX: SYNCED (REPLAY)";
+        hudCan.className = "hud-stat-num amber";
       }
     }
   }
