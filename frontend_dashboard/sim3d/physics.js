@@ -6,6 +6,7 @@
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 import RAPIER from 'https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.13.1/rapier.es.js';
+import { EngineModel } from './drivetrain.js';
 
 export class PhysicsEngine {
   constructor(vehicleRig) {
@@ -38,7 +39,8 @@ export class PhysicsEngine {
     this.steerAngles = { left: 0.0, right: 0.0 };
 
     // Powertrain & Transmission state
-    this.engineRpm = 850.0;
+    this.engine = new EngineModel({ idleRpm: 850.0, redlineRpm: 7000.0, maxRpm: 7200.0, peakTorque: 480.0 });
+    this.engineRpm = this.engine.idleRpm;
     this.gear = 1;
     this.gearRatios = [3.8, 2.35, 1.65, 1.22, 0.96, 0.78];
     this.finalDrive = 3.42;
@@ -116,6 +118,10 @@ export class PhysicsEngine {
     this.chassisBody.setLinvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
     this.chassisBody.setAngvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
     this.setSteering(0.0);
+    if (this.engine) {
+      this.engine.currentRpm = this.engine.idleRpm;
+      this.engine.fuelCut = false;
+    }
     this.engineRpm = 850.0;
     this.gear = 1;
     this.isReversing = false;
@@ -275,17 +281,26 @@ export class PhysicsEngine {
       else this.gear = 6;
     }
 
-    // Engine RPM calculation
+    // Engine RPM & Torque evaluation via EngineModel (Phase 3.1)
     const gearRatio = this.isReversing ? 3.5 : this.gearRatios[this.gear - 1];
-    const targetRpm = Math.max(850, Math.min(7200, (absSpeedKmh / 3.6 / this.wheelRadius) * gearRatio * this.finalDrive * (60 / (2 * Math.PI))));
-    this.engineRpm = THREE.MathUtils.lerp(this.engineRpm, controls.throttle > 0.05 ? Math.max(targetRpm, 2400 * controls.throttle) : targetRpm, dt * 5.0);
+    const totalDriveRatio = gearRatio * this.finalDrive;
+    const rearWheelRadS = Math.abs(forwardSpeed) / this.wheelRadius;
 
-    // Drive force calculation
+    const engineOutput = this.engine.update(
+      dt,
+      !this.isReversing ? controls.throttle : controls.brake,
+      rearWheelRadS,
+      totalDriveRatio,
+      true
+    );
+    this.engineRpm = engineOutput.rpm;
+
+    // Drive force calculation from non-linear engine torque curve
     let driveForceTotal = 0;
     if (!this.isReversing) {
-      driveForceTotal = (controls.throttle * this.maxTorque * gearRatio * this.finalDrive) / this.wheelRadius;
+      driveForceTotal = (engineOutput.torque * totalDriveRatio) / this.wheelRadius;
     } else {
-      driveForceTotal = -(controls.brake * this.maxTorque * gearRatio * this.finalDrive) / this.wheelRadius;
+      driveForceTotal = -(engineOutput.torque * totalDriveRatio) / this.wheelRadius;
     }
 
     const driveForcePerRearWheel = driveForceTotal / 2;
