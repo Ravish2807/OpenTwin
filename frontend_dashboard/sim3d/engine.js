@@ -10,6 +10,7 @@ import { EnvironmentManager } from './environment.js';
 import { VehicleRig } from './vehicle.js';
 import { PhysicsEngine } from './physics.js';
 import { InputController } from './controls.js';
+import { CANBridge } from './can_bridge.js';
 
 export class Sim3DEngine {
   constructor(containerId) {
@@ -27,6 +28,7 @@ export class Sim3DEngine {
     this.vehicleRig = null;
     this.physics = null;
     this.controls = null;
+    this.canBridge = null;
     this.cameraMode = 'chase'; // 'chase' | 'orbit' | 'cockpit'
 
     this.vehicleGroup = new THREE.Group();
@@ -99,10 +101,13 @@ export class Sim3DEngine {
     this.physics = new PhysicsEngine(this.vehicleRig);
     await this.physics.init();
 
-    // 9. Handle Viewport Resizing
+    // 9. Bidirectional CAN Bus Bridge (Phase 4.1)
+    this.canBridge = new CANBridge(this);
+
+    // 10. Handle Viewport Resizing
     this.setupResizeObserver();
 
-    // 10. Start Render Loop
+    // 11. Start Render Loop
     this.isInitialized = true;
     this.animate = this.animate.bind(this);
     requestAnimationFrame(this.animate);
@@ -175,6 +180,11 @@ export class Sim3DEngine {
     // Step Physics Simulation (Phase 2)
     if (this.physics && this.physics.isReady) {
       this.physics.step(delta, this.controls);
+    }
+
+    // Transmit Live CAN Frames (Phase 4.1)
+    if (this.canBridge) {
+      this.canBridge.update(delta);
     }
 
     // Follow vehicle with directional sun shadow frustum

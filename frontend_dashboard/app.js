@@ -695,6 +695,8 @@ function connectWebSocket() {
 
   ws.onopen = () => {
     state.isWsConnected = true;
+    window.ws = ws;
+    if (window.sim3d && window.sim3d.canBridge) window.sim3d.canBridge.setWebSocket(ws);
     elements.wsStatus.textContent = "Streaming Live";
     elements.wsDot.className = "hud-dot connected";
     logToTerminal(`Connected to WebSocket telemetry feed: ${wsUrl}`, "success");
