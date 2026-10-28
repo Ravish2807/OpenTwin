@@ -6,7 +6,7 @@
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 import RAPIER from 'https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.13.1/rapier.es.js';
-import { EngineModel } from './drivetrain.js';
+import { EngineModel, GearboxModel, DifferentialModel } from './drivetrain.js';
 
 export class PhysicsEngine {
   constructor(vehicleRig) {
@@ -40,11 +40,10 @@ export class PhysicsEngine {
 
     // Powertrain & Transmission state
     this.engine = new EngineModel({ idleRpm: 850.0, redlineRpm: 7000.0, maxRpm: 7200.0, peakTorque: 480.0 });
+    this.gearbox = new GearboxModel({ gearRatios: [3.80, 2.35, 1.65, 1.22, 0.96, 0.78], reverseRatio: 3.50, finalDrive: 3.42 });
+    this.differential = new DifferentialModel({ lockingCoeff: 0.42 });
     this.engineRpm = this.engine.idleRpm;
     this.gear = 1;
-    this.gearRatios = [3.8, 2.35, 1.65, 1.22, 0.96, 0.78];
-    this.finalDrive = 3.42;
-    this.maxTorque = 480.0; // Nm (Sports car twin-turbo V6 / electric hybrid)
     this.forwardSpeedKmh = 0.0;
     this.isReversing = false;
 
@@ -121,6 +120,11 @@ export class PhysicsEngine {
     if (this.engine) {
       this.engine.currentRpm = this.engine.idleRpm;
       this.engine.fuelCut = false;
+    }
+    if (this.gearbox) {
+      this.gearbox.currentGear = 1;
+      this.gearbox.isShifting = false;
+      this.gearbox.gearMode = 'D';
     }
     this.engineRpm = 850.0;
     this.gear = 1;
@@ -264,38 +268,24 @@ export class PhysicsEngine {
     const forwardSpeed = cLinvel.dot(chassisFwd);
     this.forwardSpeedKmh = forwardSpeed * 3.6;
 
-    // Automatic Gear Shifting logic
-    const absSpeedKmh = Math.abs(this.forwardSpeedKmh);
-    if (controls.brake > 0.1 && forwardSpeed < 0.2 && !this.isReversing) {
-      this.isReversing = true;
-    } else if (controls.throttle > 0.1 && forwardSpeed > -0.2 && this.isReversing) {
-      this.isReversing = false;
-    }
+    // 1. Automatic Gearbox shifting & dual-clutch state (Phase 3.2)
+    const shiftState = this.gearbox.update(dt, this.engineRpm, controls.throttle, controls.brake, forwardSpeed);
+    this.gear = this.gearbox.currentGear;
+    this.isReversing = (this.gear === -1);
+    const totalDriveRatio = this.gearbox.getTotalRatio();
 
-    if (!this.isReversing) {
-      if (absSpeedKmh < 42) this.gear = 1;
-      else if (absSpeedKmh < 75) this.gear = 2;
-      else if (absSpeedKmh < 112) this.gear = 3;
-      else if (absSpeedKmh < 155) this.gear = 4;
-      else if (absSpeedKmh < 205) this.gear = 5;
-      else this.gear = 6;
-    }
-
-    // Engine RPM & Torque evaluation via EngineModel (Phase 3.1)
-    const gearRatio = this.isReversing ? 3.5 : this.gearRatios[this.gear - 1];
-    const totalDriveRatio = gearRatio * this.finalDrive;
+    // 2. Engine RPM & Torque evaluation with dual-clutch factor (Phase 3.1 & 3.2)
     const rearWheelRadS = Math.abs(forwardSpeed) / this.wheelRadius;
-
     const engineOutput = this.engine.update(
       dt,
       !this.isReversing ? controls.throttle : controls.brake,
       rearWheelRadS,
       totalDriveRatio,
-      true
+      shiftState.clutchFactor
     );
     this.engineRpm = engineOutput.rpm;
 
-    // Drive force calculation from non-linear engine torque curve
+    // 3. Drive force calculation from non-linear engine torque curve
     let driveForceTotal = 0;
     if (!this.isReversing) {
       driveForceTotal = (engineOutput.torque * totalDriveRatio) / this.wheelRadius;
@@ -303,7 +293,11 @@ export class PhysicsEngine {
       driveForceTotal = -(engineOutput.torque * totalDriveRatio) / this.wheelRadius;
     }
 
-    const driveForcePerRearWheel = driveForceTotal / 2;
+    // 4. Limited-Slip Differential (LSD) Torque Split between rear wheels (Phase 3.2)
+    const omegaRL = Math.abs(forwardSpeed) / this.wheelRadius;
+    const omegaRR = Math.abs(forwardSpeed) / this.wheelRadius;
+    const lsdTorque = this.differential.splitTorque(driveForceTotal, omegaRL, omegaRR);
+
     const brakeForcePerWheel = (controls.brake * 6500) / 4;
 
     // Apply Pacejka friction & traction for all 4 wheels
@@ -342,7 +336,7 @@ export class PhysicsEngine {
       // 2. Longitudinal Force (Drive / Brake / Rolling resistance)
       let fLong = 0;
       if (wheel.isDriven && !controls.handbrake) {
-        fLong += driveForcePerRearWheel;
+        fLong += (wheel.id === 'RL') ? lsdTorque.left : lsdTorque.right;
       }
 
       // Braking opposing velocity
