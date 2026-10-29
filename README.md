@@ -28,7 +28,10 @@ The following interactive architecture diagram (designed in the **[Archify](http
 
 | Functional Module | Technology Stack | Capabilities & Scope |
 | :--- | :--- | :--- |
-| **🚗 3D Vehicle Digital Twin** | Three.js (WebGL / WebGPU) | PBR clearcoat lacquer, 2048×2048 PCF soft shadows, asphalt proving ground skid pad, projector headlights, multi-cam rig (`Chase`, `Orbit`, `Cockpit`). |
+| **🚗 3D Vehicle Digital Twin** | Three.js (WebGL / WebGPU) | PBR clearcoat lacquer, 2048×2048 PCF soft shadows, multi-cam rig (`Chase`, `Orbit`, `Cockpit`). |
+| **🏁 Proving Ground & Test Track** | Procedural Geometry & Colliders | 200m sprint runway with metric distance markers, concentric skid pad ($R=10..50\text{m}$), slalom obstacle course, FIA red/white rumble strips, and Rapier3D physical collision barriers. |
+| **💡 Dynamic Lighting & Presets** | Directional & SpotLight Shadows | Dual projector headlights (Off / Low Beam / High Beam) casting real-time 1024×1024 shadows, white reverse backup lamps, and Day / Dusk / Night sky environment presets toggled via <kbd>N</kbd>. |
+| **💨 Tire Smoke & Skidmarks** | Particle System & Quad Mesh Pool | Dynamic smoke particle emitter activated during Pacejka tire slip, buoyant lift, and persistent asphalt rubber skidmarks with FIFO quad strip recycling. |
 | **⚙️ WASM Physics & Suspension** | Rapier3D (`@dimforge/rapier3d-compat`) | 60 Hz deterministic physics, 4-wheel independent raycast suspension ($k=34\text{ kN/m}$, $c=4.4\text{ kN}\cdot\text{s/m}$), and ground collision plane. |
 | **🏎️ Steering & Tire Dynamics** | Analytical Ackermann & Pacejka | Unequal inner/outer wheel steering ($\delta_{\text{inner}} \neq \delta_{\text{outer}}$), Pacejka Magic Formula tire friction curves, friction circle clamping, and handbrake drift. |
 | **⚡ Powertrain & Weight Transfer** | Kinematic Drivetrain Model | Non-linear engine torque curve (220–480 Nm), idle governor (850 RPM), 7200 RPM fuel-cut bounce, 6-speed DCT gearbox, limited-slip differential (LSD), and acceleration squat / braking dive. |
@@ -52,6 +55,8 @@ When viewing the **🚗 3D Digital Twin** tab, you can drive the car interactive
 | **Brake / Reverse** | <kbd>S</kbd> or <kbd>↓</kbd> | Illuminates rear LED brake bar, induces nose dive pitch, decelerates, and engages Reverse |
 | **Steer Left / Right** | <kbd>A</kbd> / <kbd>D</kbd> or <kbd>←</kbd> / <kbd>→</kbd> | Applies Ackermann unequal angle geometry to front wheels and creates centrifugal body roll |
 | **Handbrake Drift** | <kbd>Space</kbd> | Locks rear wheels, breaks Pacejka lateral tire adhesion into a controlled power slide |
+| **Headlights Toggle** | <kbd>L</kbd> | Cycles dual projector headlights (Off → Low Beam → High Beam) with real-time shadow casting |
+| **Day / Night Preset** | <kbd>N</kbd> | Cycles ambient environment presets (Day → Dusk → Night) adjusting sky color, sun angles, and fog |
 | **Reset Vehicle** | <kbd>R</kbd> | Instantly resets the vehicle translation and orientation back to the starting grid $(0, 0.75, 0)$ |
 | **Operating Mode** | Header Button | Toggles between **🎮 Virtual Drive (WASD)** (3D $\rightarrow$ CAN) and **📡 CAN Replay Sync Mode** (CAN $\rightarrow$ 3D) |
 | **Camera Views** | Header Pills | Switch between **🎥 Chase Cam**, **🔄 Free Orbit**, and **🏎️ Cockpit Cam** |
@@ -260,6 +265,7 @@ OpenTwin/
 │       ├── physics.js           # Rapier3D WASM, raycast suspension, Ackermann & Pacejka
 │       ├── drivetrain.js        # Engine torque curve, 6-speed DCT gearbox & LSD
 │       ├── controls.js          # Interactive WASD driving input controller
+│       ├── effects.js           # Dynamic tire smoke particle emitter & persistent skidmark quad pool
 │       └── can_bridge.js        # 25Hz binary CAN serialization & replay synchronization
 ├── scripts/
 │   ├── setup_vcan.sh            # SocketCAN vcan0 initialization script

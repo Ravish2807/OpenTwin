@@ -240,12 +240,12 @@
   <text x="78" y="528" fill="#ffffff" font-size="11" font-weight="700">Three.js WebGL &amp; Rapier3D WASM (60 Hz)</text>
   
   <text x="78" y="550" fill="#a5f3fc" class="mono" font-size="9.5">• PBR Clearcoat Paint &amp; Soft Shadow Maps (2048x2048)</text>
-  <text x="78" y="567" fill="#94a3b8" font-size="9.5">• 4-Wheel Independent Raycast Suspension (k=34 kN/m)</text>
-  <text x="78" y="584" fill="#94a3b8" font-size="9.5">• Ackermann Steering Geometry &amp; Dynamic Wheel Angles</text>
-  <text x="78" y="601" fill="#94a3b8" font-size="9.5">• Pacejka 'Magic Formula' Tire Cornering &amp; Handbrake Drift</text>
-  <text x="78" y="618" fill="#94a3b8" font-size="9.5">• 6-Speed Dual-Clutch Transmission &amp; Limited-Slip Diff (LSD)</text>
-  <text x="78" y="635" fill="#94a3b8" font-size="9.5">• Weight Transfer Dynamics: Acceleration Squat &amp; Dive Pitch</text>
-  <text x="78" y="652" fill="#34d399" font-weight="700" font-size="9.5">• Dual Modes: Virtual Driving (WASD) ↔ CAN Replay Sync</text>
+  <text x="78" y="567" fill="#94a3b8" font-size="9.5">• 4-Wheel Raycast Suspension (k=34 kN/m) &amp; Ackermann Steer</text>
+  <text x="78" y="584" fill="#94a3b8" font-size="9.5">• Pacejka 'Magic Formula' Tire Cornering &amp; Handbrake Drift</text>
+  <text x="78" y="601" fill="#94a3b8" font-size="9.5">• 6-Speed DCT Gearbox, Limited-Slip Diff &amp; Weight Transfer</text>
+  <text x="78" y="618" fill="#94a3b8" font-size="9.5">• 200m Sprint Runway, Slalom Cones &amp; Collision Barriers</text>
+  <text x="78" y="635" fill="#94a3b8" font-size="9.5">• Low/High Beam Headlights &amp; Day/Dusk/Night Ambient Presets</text>
+  <text x="78" y="652" fill="#34d399" font-weight="700" font-size="9.5">• Dynamic Tire Smoke Particles &amp; Persistent Asphalt Skidmarks</text>
   <text x="78" y="669" fill="#38bdf8" class="mono" font-size="9.5">• 25 Hz Binary Serialization to 0x100 &amp; 0x200 over ws://</text>
   
   <!-- Camera pills inside 3D card -->
@@ -253,7 +253,7 @@
   <text x="88" y="701" fill="#a5f3fc" class="mono" font-size="9">CAMERAS: Chase Follow • Free Orbit • Cockpit View</text>
   
   <rect x="78" y="718" width="330" height="22" rx="4" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" stroke-width="0.8" />
-  <text x="88" y="733" fill="#6ee7b7" class="mono" font-size="9">CONTROLS: WASD / Arrows • Space (Handbrake) • R (Reset)</text>
+  <text x="88" y="733" fill="#6ee7b7" class="mono" font-size="9">KEYS: WASD • Space (Drift) • L (Lights) • N (Night) • R</text>
 
   <!-- Module 2: Cockpit Cluster -->
   <rect x="440" y="480" width="235" height="128" rx="10" fill="#0f172a" stroke="#00f0ff" stroke-width="1.2" />
