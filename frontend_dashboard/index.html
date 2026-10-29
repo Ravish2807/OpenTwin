@@ -8,6 +8,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- ES Module Import Map for Three.js & Addons -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
 </head>
 <body>
   <div class="workbench-layout">
@@ -690,35 +699,49 @@
   <script src="app.js"></script>
   <script type="module">
     import { Sim3DEngine } from './sim3d/engine.js';
-    window.addEventListener('DOMContentLoaded', () => {
-      window.sim3d = new Sim3DEngine('sim3d-canvas-container');
 
-      // Bind camera buttons
-      const btnChase = document.getElementById('cam-btn-chase');
-      const btnOrbit = document.getElementById('cam-btn-orbit');
-      const btnCockpit = document.getElementById('cam-btn-cockpit');
-      const camButtons = [btnChase, btnOrbit, btnCockpit];
+    function initSim3D() {
+      if (window.sim3d) return;
+      try {
+        window.sim3d = new Sim3DEngine('sim3d-canvas-container');
 
-      function selectCam(btn, mode) {
-        camButtons.forEach(b => b && b.classList.remove('active'));
-        if (btn) btn.classList.add('active');
-        if (window.sim3d) window.sim3d.setCameraMode(mode);
+        // Bind camera buttons
+        const btnChase = document.getElementById('cam-btn-chase');
+        const btnOrbit = document.getElementById('cam-btn-orbit');
+        const btnCockpit = document.getElementById('cam-btn-cockpit');
+        const camButtons = [btnChase, btnOrbit, btnCockpit];
+
+        function selectCam(btn, mode) {
+          camButtons.forEach(b => b && b.classList.remove('active'));
+          if (btn) btn.classList.add('active');
+          if (window.sim3d) window.sim3d.setCameraMode(mode);
+        }
+
+        if (btnChase) btnChase.addEventListener('click', () => selectCam(btnChase, 'chase'));
+        if (btnOrbit) btnOrbit.addEventListener('click', () => selectCam(btnOrbit, 'orbit'));
+        if (btnCockpit) btnCockpit.addEventListener('click', () => selectCam(btnCockpit, 'cockpit'));
+
+        // Bind Simulation / Replay mode toggle (Phase 4.2)
+        const btnToggleMode = document.getElementById('btn-toggle-sim-mode');
+        if (btnToggleMode) {
+          btnToggleMode.addEventListener('click', () => {
+            if (window.sim3d && window.sim3d.canBridge) {
+              window.sim3d.canBridge.toggleMode();
+            }
+          });
+        }
+      } catch (err) {
+        console.error("[OpenTwin] Failed to start 3D simulation engine:", err);
       }
+    }
 
-      if (btnChase) btnChase.addEventListener('click', () => selectCam(btnChase, 'chase'));
-      if (btnOrbit) btnOrbit.addEventListener('click', () => selectCam(btnOrbit, 'orbit'));
-      if (btnCockpit) btnCockpit.addEventListener('click', () => selectCam(btnCockpit, 'cockpit'));
+    window.initSim3D = initSim3D;
 
-      // Bind Simulation / Replay mode toggle (Phase 4.2)
-      const btnToggleMode = document.getElementById('btn-toggle-sim-mode');
-      if (btnToggleMode) {
-        btnToggleMode.addEventListener('click', () => {
-          if (window.sim3d && window.sim3d.canBridge) {
-            window.sim3d.canBridge.toggleMode();
-          }
-        });
-      }
-    });
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSim3D);
+    } else {
+      initSim3D();
+    }
   </script>
 </body>
 </html>

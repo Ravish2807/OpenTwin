@@ -115,7 +115,7 @@ export class VisualEffectsManager {
     if (this.skidMeshPool.length > this.maxSkidSegments) {
       const oldest = this.skidMeshPool.shift();
       this.skidGroup.remove(oldest);
-      if (oldest.geometry) oldest.geometry.dispose();
+      // Note: oldest shares this.skidGeom and this.skidMat, do not dispose them
     }
   }
 

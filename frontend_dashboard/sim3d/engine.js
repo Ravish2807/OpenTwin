@@ -76,6 +76,9 @@ export class Sim3DEngine {
     this.renderer.toneMappingExposure = 1.1;
 
     this.container.innerHTML = '';
+    this.renderer.domElement.style.width = '100%';
+    this.renderer.domElement.style.height = '100%';
+    this.renderer.domElement.style.display = 'block';
     this.container.appendChild(this.renderer.domElement);
 
     // 4. Orbit Controls (Enabled in 'orbit' mode)
