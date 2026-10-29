@@ -87,6 +87,45 @@ export class PhysicsEngine {
         .setRestitution(0.02);
       this.groundBody = this.world.createCollider(groundDesc);
 
+      // 2b. Physical Perimeter Safety Barriers & Slalom Cones (Phase 5.1)
+      const wallFriction = 0.6;
+      const wallRestitution = 0.25;
+
+      // North Wall (Z = 220m) & South Wall (Z = -140m)
+      const northWall = RAPIER.ColliderDesc.cuboid(140.0, 0.6, 0.5)
+        .setTranslation(0.0, 0.6, 220.0)
+        .setFriction(wallFriction)
+        .setRestitution(wallRestitution);
+      this.world.createCollider(northWall);
+
+      const southWall = RAPIER.ColliderDesc.cuboid(140.0, 0.6, 0.5)
+        .setTranslation(0.0, 0.6, -140.0)
+        .setFriction(wallFriction)
+        .setRestitution(wallRestitution);
+      this.world.createCollider(southWall);
+
+      // East Wall (X = 140m) & West Wall (X = -140m)
+      const eastWall = RAPIER.ColliderDesc.cuboid(0.5, 0.6, 180.0)
+        .setTranslation(140.0, 0.6, 40.0)
+        .setFriction(wallFriction)
+        .setRestitution(wallRestitution);
+      this.world.createCollider(eastWall);
+
+      const westWall = RAPIER.ColliderDesc.cuboid(0.5, 0.6, 180.0)
+        .setTranslation(-140.0, 0.6, 40.0)
+        .setFriction(wallFriction)
+        .setRestitution(wallRestitution);
+      this.world.createCollider(westWall);
+
+      // Slalom Obstacle Cones (X = -35m)
+      for (let z = -60; z <= 100; z += 20) {
+        const coneCol = RAPIER.ColliderDesc.cylinder(0.45, 0.28)
+          .setTranslation(-35.0, 0.45, z)
+          .setFriction(0.5)
+          .setRestitution(0.2);
+        this.world.createCollider(coneCol);
+      }
+
       // 3. Dynamic Vehicle Chassis RigidBody
       const chassisBodyDesc = RAPIER.RigidBodyDesc.dynamic()
         .setTranslation(0.0, this.initialY, 0.0)

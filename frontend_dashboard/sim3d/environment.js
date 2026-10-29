@@ -1,6 +1,7 @@
 /**
  * OpenTwin: 3D Vehicle Simulation — Environment & Lighting
- * Phase 1.2 — Photorealistic Lighting Rig, Shadow Maps, and Proving Ground
+ * Phase 1.2 & Phase 5.1 — Photorealistic Lighting Rig, Shadow Maps,
+ * Comprehensive Proving Ground, Runway Lanes, Slalom Cones & Perimeter Barriers
  */
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
@@ -12,11 +13,16 @@ export class EnvironmentManager {
 
     this.sunLight = null;
     this.hemiLight = null;
+    this.ambientLight = null;
     this.groundMesh = null;
-    this.gridHelper = null;
+    this.cones = [];
+    this.barriers = [];
 
     this.setupLighting();
     this.setupProvingGround();
+    this.setupRunwayLanes();
+    this.setupSlalomCourse();
+    this.setupSafetyBarriers();
   }
 
   setupLighting() {
@@ -26,8 +32,8 @@ export class EnvironmentManager {
     this.scene.add(this.hemiLight);
 
     // 2. Ambient Fill Light for deep cyber shadows
-    const ambientLight = new THREE.AmbientLight(0x1e293b, 0.4);
-    this.scene.add(ambientLight);
+    this.ambientLight = new THREE.AmbientLight(0x1e293b, 0.4);
+    this.scene.add(this.ambientLight);
 
     // 3. Primary Key Sun Light with High-Resolution Cascaded Soft Shadows
     this.sunLight = new THREE.DirectionalLight(0xffffff, 2.8);
@@ -40,7 +46,7 @@ export class EnvironmentManager {
     this.sunLight.shadow.camera.near = 0.5;
     this.sunLight.shadow.camera.far = 160;
 
-    const d = 35;
+    const d = 40;
     this.sunLight.shadow.camera.left = -d;
     this.sunLight.shadow.camera.right = d;
     this.sunLight.shadow.camera.top = d;
@@ -123,40 +129,30 @@ export class EnvironmentManager {
   createCenterPad() {
     const padGroup = new THREE.Group();
 
-    // Central circular skid pad
-    const ringGeo = new THREE.RingGeometry(18, 18.2, 64);
-    const ringMat = new THREE.MeshBasicMaterial({
-      color: 0x00f0ff,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.4
-    });
-    const ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x = -Math.PI / 2;
-    ring.position.y = 0.01;
-    padGroup.add(ring);
-
-    // Outer dynamic radius ring
-    const outerRingGeo = new THREE.RingGeometry(38, 38.3, 64);
-    const outerRingMat = new THREE.MeshBasicMaterial({
-      color: 0x38bdf8,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.25
-    });
-    const outerRing = new THREE.Mesh(outerRingGeo, outerRingMat);
-    outerRing.rotation.x = -Math.PI / 2;
-    outerRing.position.y = 0.01;
-    padGroup.add(outerRing);
+    // Concentric radius rings for skid pad: 10m, 20m, 30m, 40m, 50m
+    const radii = [10, 20, 30, 40, 50];
+    for (const r of radii) {
+      const ringGeo = new THREE.RingGeometry(r - 0.1, r + 0.1, 64);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: r === 30 ? 0x00f0ff : 0x38bdf8,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: r === 30 ? 0.45 : 0.2
+      });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.y = 0.01;
+      padGroup.add(ring);
+    }
 
     // Starting grid launch stripes
     for (let i = -3; i <= 3; i++) {
-      const stripeGeo = new THREE.PlaneGeometry(0.3, 3);
+      const stripeGeo = new THREE.PlaneGeometry(0.35, 3.2);
       const stripeMat = new THREE.MeshBasicMaterial({
         color: 0xffffff,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.35
+        opacity: 0.4
       });
       const stripe = new THREE.Mesh(stripeGeo, stripeMat);
       stripe.rotation.x = -Math.PI / 2;
@@ -165,6 +161,141 @@ export class EnvironmentManager {
     }
 
     this.scene.add(padGroup);
+  }
+
+  setupRunwayLanes() {
+    const runwayGroup = new THREE.Group();
+
+    // 200m Sprint Runway Lane Markings
+    const laneWidth = 12.0;
+    const runwayLength = 200.0;
+
+    // Outer Boundary Lines (Solid White)
+    const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 });
+    const borderLeft = new THREE.Mesh(new THREE.PlaneGeometry(0.25, runwayLength), lineMat);
+    borderLeft.rotation.x = -Math.PI / 2;
+    borderLeft.position.set(-laneWidth / 2, 0.015, runwayLength / 2);
+    runwayGroup.add(borderLeft);
+
+    const borderRight = new THREE.Mesh(new THREE.PlaneGeometry(0.25, runwayLength), lineMat);
+    borderRight.rotation.x = -Math.PI / 2;
+    borderRight.position.set(laneWidth / 2, 0.015, runwayLength / 2);
+    runwayGroup.add(borderRight);
+
+    // Center Dashed Dividing Line (Cyan Glow)
+    const dashMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.6 });
+    for (let z = 5; z < runwayLength; z += 10) {
+      const dash = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 5), dashMat);
+      dash.rotation.x = -Math.PI / 2;
+      dash.position.set(0, 0.015, z);
+      runwayGroup.add(dash);
+    }
+
+    // Distance Milestone Markers on Track (50m, 100m, 150m, 200m)
+    const milestones = [50, 100, 150, 200];
+    const markerMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.7 });
+    for (const dist of milestones) {
+      const bar = new THREE.Mesh(new THREE.PlaneGeometry(laneWidth, 0.6), markerMat);
+      bar.rotation.x = -Math.PI / 2;
+      bar.position.set(0, 0.016, dist);
+      runwayGroup.add(bar);
+    }
+
+    this.scene.add(runwayGroup);
+  }
+
+  setupSlalomCourse() {
+    const coneGroup = new THREE.Group();
+
+    const coneMat = new THREE.MeshStandardMaterial({
+      color: 0xff6600,
+      roughness: 0.4,
+      metalness: 0.1
+    });
+    const baseMat = new THREE.MeshStandardMaterial({
+      color: 0x111111,
+      roughness: 0.8
+    });
+    const collarMat = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      roughness: 0.2
+    });
+
+    // Place 9 traffic cones along X = -35m from Z = -60m to Z = 100m (every 20m)
+    for (let z = -60; z <= 100; z += 20) {
+      const coneUnit = new THREE.Group();
+
+      // Square base
+      const base = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.05, 0.55), baseMat);
+      base.position.y = 0.025;
+      base.castShadow = true;
+      base.receiveShadow = true;
+      coneUnit.add(base);
+
+      // Orange cone
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.85, 16), coneMat);
+      cone.position.y = 0.45;
+      cone.castShadow = true;
+      coneUnit.add(cone);
+
+      // White reflective collar
+      const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.18, 0.2, 16), collarMat);
+      collar.position.y = 0.48;
+      coneUnit.add(collar);
+
+      coneUnit.position.set(-35.0, 0, z);
+      coneGroup.add(coneUnit);
+      this.cones.push(coneUnit);
+    }
+
+    this.scene.add(coneGroup);
+  }
+
+  setupSafetyBarriers() {
+    const barrierGroup = new THREE.Group();
+
+    // Red-and-White FIA-style alternating curb barrier material
+    const redMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.6 });
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf3f4f6, roughness: 0.6 });
+
+    const createSegmentedWall = (x, y, z, width, length, isHorizontal) => {
+      const wallGroup = new THREE.Group();
+      const segLen = 4.0;
+      const totalLen = isHorizontal ? width : length;
+      const count = Math.floor(totalLen / segLen);
+
+      for (let i = 0; i < count; i++) {
+        const mat = (i % 2 === 0) ? redMat : whiteMat;
+        let mesh;
+        if (isHorizontal) {
+          mesh = new THREE.Mesh(new THREE.BoxGeometry(segLen, 1.2, 1.0), mat);
+          mesh.position.set(-totalLen / 2 + i * segLen + segLen / 2, 0.6, 0);
+        } else {
+          mesh = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.2, segLen), mat);
+          mesh.position.set(0, 0.6, -totalLen / 2 + i * segLen + segLen / 2);
+        }
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        wallGroup.add(mesh);
+      }
+
+      wallGroup.position.set(x, y, z);
+      barrierGroup.add(wallGroup);
+    };
+
+    // North Barrier: Z = 220m
+    createSegmentedWall(0, 0, 220, 280, 1, true);
+
+    // South Barrier: Z = -140m
+    createSegmentedWall(0, 0, -140, 280, 1, true);
+
+    // East Barrier: X = 140m
+    createSegmentedWall(140, 0, 40, 1, 360, false);
+
+    // West Barrier: X = -140m
+    createSegmentedWall(-140, 0, 40, 1, 360, false);
+
+    this.scene.add(barrierGroup);
   }
 
   update(targetPos) {
