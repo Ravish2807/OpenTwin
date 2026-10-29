@@ -305,4 +305,55 @@ export class EnvironmentManager {
       this.sunLight.target.position.copy(targetPos);
     }
   }
+
+  setLightingPreset(mode) {
+    this.currentPreset = mode;
+    if (mode === 'night') {
+      if (this.sunLight) this.sunLight.intensity = 0.2;
+      if (this.hemiLight) {
+        this.hemiLight.color.setHex(0x1e293b);
+        this.hemiLight.groundColor.setHex(0x020617);
+        this.hemiLight.intensity = 0.25;
+      }
+      if (this.ambientLight) this.ambientLight.intensity = 0.15;
+      this.scene.background = new THREE.Color(0x02040a);
+      if (this.scene.fog) {
+        this.scene.fog.color = new THREE.Color(0x02040a);
+        this.scene.fog.density = 0.012;
+      }
+    } else if (mode === 'dusk') {
+      if (this.sunLight) {
+        this.sunLight.intensity = 1.8;
+        this.sunLight.color.setHex(0xfb923c);
+      }
+      if (this.hemiLight) {
+        this.hemiLight.color.setHex(0xc084fc);
+        this.hemiLight.groundColor.setHex(0x1e1b4b);
+        this.hemiLight.intensity = 0.55;
+      }
+      if (this.ambientLight) this.ambientLight.intensity = 0.3;
+      this.scene.background = new THREE.Color(0x0f172a);
+      if (this.scene.fog) {
+        this.scene.fog.color = new THREE.Color(0x0f172a);
+        this.scene.fog.density = 0.009;
+      }
+    } else {
+      if (this.sunLight) {
+        this.sunLight.intensity = 2.8;
+        this.sunLight.color.setHex(0xffffff);
+      }
+      if (this.hemiLight) {
+        this.hemiLight.color.setHex(0x7dd3fc);
+        this.hemiLight.groundColor.setHex(0x090d16);
+        this.hemiLight.intensity = 0.75;
+      }
+      if (this.ambientLight) this.ambientLight.intensity = 0.4;
+      this.scene.background = new THREE.Color(0x060913);
+      if (this.scene.fog) {
+        this.scene.fog.color = new THREE.Color(0x060913);
+        this.scene.fog.density = 0.008;
+      }
+    }
+    console.log(`[Environment] Lighting Preset set to: ${mode.toUpperCase()}`);
+  }
 }

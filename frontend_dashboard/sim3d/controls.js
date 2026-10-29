@@ -18,6 +18,8 @@ export class InputController {
     this.steer = 0.0;
     this.handbrake = false;
     this.onReset = null;
+    this.onToggleLights = null;
+    this.onToggleNightMode = null;
 
     this.steerSpeed = 2.8;     // Steering responsiveness
     this.steerReturn = 3.6;    // Auto-centering speed
@@ -53,6 +55,12 @@ export class InputController {
           break;
         case 'KeyR':
           if (this.onReset) this.onReset();
+          break;
+        case 'KeyL':
+          if (this.onToggleLights) this.onToggleLights();
+          break;
+        case 'KeyN':
+          if (this.onToggleNightMode) this.onToggleNightMode();
           break;
       }
     });

@@ -29,6 +29,7 @@ export class Sim3DEngine {
     this.physics = null;
     this.controls = null;
     this.canBridge = null;
+    this.headlightState = 1; // 0=Off, 1=Low Beam, 2=High Beam
     this.cameraMode = 'chase'; // 'chase' | 'orbit' | 'cockpit'
 
     this.vehicleGroup = new THREE.Group();
@@ -91,10 +92,20 @@ export class Sim3DEngine {
     this.vehicleRig = new VehicleRig(this.scene);
     this.vehicleGroup = this.vehicleRig.root;
 
-    // 7. Keyboard Driving Input Controller (Phase 2.4)
+    // 7. Keyboard Driving Input Controller (Phase 2.4 & 5.2)
     this.controls = new InputController();
     this.controls.onReset = () => {
       if (this.physics) this.physics.resetPosition();
+    };
+    this.controls.onToggleLights = () => {
+      this.headlightState = (this.headlightState + 1) % 3;
+      if (this.vehicleRig) this.vehicleRig.setHeadlights(this.headlightState);
+    };
+    const envPresets = ['day', 'dusk', 'night'];
+    let envPresetIdx = 0;
+    this.controls.onToggleNightMode = () => {
+      envPresetIdx = (envPresetIdx + 1) % envPresets.length;
+      if (this.environment) this.environment.setLightingPreset(envPresets[envPresetIdx]);
     };
 
     // 8. Rapier3D Physics Engine (Phase 2)
@@ -180,6 +191,9 @@ export class Sim3DEngine {
     // Step Physics Simulation (Phase 2)
     if (this.physics && this.physics.isReady) {
       this.physics.step(delta, this.controls);
+      if (this.vehicleRig) {
+        this.vehicleRig.setReverse(this.physics.isReversing);
+      }
     }
 
     // Transmit Live CAN Frames (Phase 4.1)

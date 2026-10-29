@@ -88,7 +88,7 @@ export class CANBridge {
   /**
    * Packs 0x200 Vehicle_Status according to vehicle_base.dbc
    */
-  packVehicleStatus(gearNum, isBraking, steeringAngleDeg, turnSignal = 0, fuelPct = 78.0, battPct = 90.0) {
+  packVehicleStatus(gearNum, isBraking, steeringAngleDeg, headlightsActive = true, turnSignal = 0, fuelPct = 78.0, battPct = 90.0) {
     const fuelRaw = Math.floor(fuelPct / 0.5) & 0xFF;
     const battRaw = Math.floor(battPct / 0.5) & 0xFF;
 
@@ -108,7 +108,7 @@ export class CANBridge {
     const b2 = byte2;
     const b3 = u8[0];
     const b4 = u8[1];
-    const b5 = 1;
+    const b5 = headlightsActive ? 1 : 0;
     const b6 = 0;
     const b7 = 0;
 
@@ -152,7 +152,8 @@ export class CANBridge {
       }));
 
       // 2. Pack & Inject 0x200 Vehicle_Status
-      const hexStatus = this.packVehicleStatus(gear, isBraking, steerDeg);
+      const headlightsActive = (this.simEngine.headlightState ?? 1) > 0;
+      const hexStatus = this.packVehicleStatus(gear, isBraking, steerDeg, headlightsActive);
       ws.send(JSON.stringify({
         action: "inject_frame",
         can_id: "0x200",

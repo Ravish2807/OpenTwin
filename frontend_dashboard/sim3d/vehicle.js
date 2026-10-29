@@ -179,14 +179,25 @@ export class VehicleRig {
     this.chassisGroup.add(headL);
     this.chassisGroup.add(headR);
 
-    // Dynamic Headlight Spotlights pointing forward
-    this.headlightSpotL = new THREE.SpotLight(0xc8eeff, 3.0, 45, Math.PI / 6, 0.35, 1.2);
+    // Dynamic Headlight Spotlights with real-time shadow projection
+    this.headlightSpotL = new THREE.SpotLight(0xdbeafe, 4.0, 50, Math.PI / 5.5, 0.35, 1.2);
     this.headlightSpotL.position.set(-0.68, 0.54, 2.45);
-    this.headlightSpotL.target.position.set(-0.68, 0.1, 20);
+    this.headlightSpotL.target.position.set(-0.68, 0.1, 25);
+    this.headlightSpotL.castShadow = true;
+    this.headlightSpotL.shadow.mapSize.width = 1024;
+    this.headlightSpotL.shadow.mapSize.height = 1024;
+    this.headlightSpotL.shadow.bias = -0.0005;
 
-    this.headlightSpotR = new THREE.SpotLight(0xc8eeff, 3.0, 45, Math.PI / 6, 0.35, 1.2);
+    this.headlightSpotR = new THREE.SpotLight(0xdbeafe, 4.0, 50, Math.PI / 5.5, 0.35, 1.2);
     this.headlightSpotR.position.set(0.68, 0.54, 2.45);
-    this.headlightSpotR.target.position.set(0.68, 0.1, 20);
+    this.headlightSpotR.target.position.set(0.68, 0.1, 25);
+    this.headlightSpotR.castShadow = true;
+    this.headlightSpotR.shadow.mapSize.width = 1024;
+    this.headlightSpotR.shadow.mapSize.height = 1024;
+    this.headlightSpotR.shadow.bias = -0.0005;
+
+    this.headlightMat = headMat;
+    this.headlightMode = 1; // 0=Off, 1=Low Beam, 2=High Beam
 
     this.chassisGroup.add(this.headlightSpotL);
     this.chassisGroup.add(this.headlightSpotL.target);
@@ -203,6 +214,17 @@ export class VehicleRig {
     this.taillightMesh = new THREE.Mesh(new THREE.BoxGeometry(1.68, 0.07, 0.04), tailMat);
     this.taillightMesh.position.set(0, 0.64, -2.16);
     this.chassisGroup.add(this.taillightMesh);
+
+    // White Reverse Backup Lamps
+    const revMat = new THREE.MeshStandardMaterial({
+      color: 0x222222,
+      emissive: 0xffffff,
+      emissiveIntensity: 0.0,
+      roughness: 0.2
+    });
+    this.reverseLightMesh = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.05, 0.04), revMat);
+    this.reverseLightMesh.position.set(0, 0.42, -2.18);
+    this.chassisGroup.add(this.reverseLightMesh);
   }
 
   setupWheels() {
@@ -318,5 +340,33 @@ export class VehicleRig {
   setBodyPitchRoll(pitch, roll) {
     this.chassisGroup.rotation.x = pitch;
     this.chassisGroup.rotation.z = roll;
+  }
+
+  setHeadlights(mode) {
+    this.headlightMode = mode; // 0=Off, 1=Low, 2=High
+    if (mode === 0) {
+      this.headlightSpotL.intensity = 0.0;
+      this.headlightSpotR.intensity = 0.0;
+      if (this.headlightMat) this.headlightMat.emissiveIntensity = 0.2;
+    } else if (mode === 1) {
+      this.headlightSpotL.intensity = 4.0;
+      this.headlightSpotR.intensity = 4.0;
+      this.headlightSpotL.distance = 50.0;
+      this.headlightSpotR.distance = 50.0;
+      if (this.headlightMat) this.headlightMat.emissiveIntensity = 2.8;
+    } else if (mode === 2) {
+      this.headlightSpotL.intensity = 8.5;
+      this.headlightSpotR.intensity = 8.5;
+      this.headlightSpotL.distance = 95.0;
+      this.headlightSpotR.distance = 95.0;
+      if (this.headlightMat) this.headlightMat.emissiveIntensity = 5.0;
+    }
+  }
+
+  setReverse(isReversing) {
+    if (this.reverseLightMesh && this.reverseLightMesh.material) {
+      this.reverseLightMesh.material.emissiveIntensity = isReversing ? 4.0 : 0.0;
+      this.reverseLightMesh.material.color.setHex(isReversing ? 0xffffff : 0x222222);
+    }
   }
 }
