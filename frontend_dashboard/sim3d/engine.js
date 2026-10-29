@@ -11,6 +11,7 @@ import { VehicleRig } from './vehicle.js';
 import { PhysicsEngine } from './physics.js';
 import { InputController } from './controls.js';
 import { CANBridge } from './can_bridge.js';
+import { VisualEffectsManager } from './effects.js';
 
 export class Sim3DEngine {
   constructor(containerId) {
@@ -29,6 +30,7 @@ export class Sim3DEngine {
     this.physics = null;
     this.controls = null;
     this.canBridge = null;
+    this.effects = null;
     this.headlightState = 1; // 0=Off, 1=Low Beam, 2=High Beam
     this.cameraMode = 'chase'; // 'chase' | 'orbit' | 'cockpit'
 
@@ -115,10 +117,13 @@ export class Sim3DEngine {
     // 9. Bidirectional CAN Bus Bridge (Phase 4.1)
     this.canBridge = new CANBridge(this);
 
-    // 10. Handle Viewport Resizing
+    // 10. Dynamic Tire Smoke Particles & Persistent Skidmarks (Phase 5.3)
+    this.effects = new VisualEffectsManager(this.scene);
+
+    // 11. Handle Viewport Resizing
     this.setupResizeObserver();
 
-    // 11. Start Render Loop
+    // 12. Start Render Loop
     this.isInitialized = true;
     this.animate = this.animate.bind(this);
     requestAnimationFrame(this.animate);
@@ -199,6 +204,11 @@ export class Sim3DEngine {
     // Transmit Live CAN Frames (Phase 4.1)
     if (this.canBridge) {
       this.canBridge.update(delta);
+    }
+
+    // Dynamic Tire Smoke & Skidmarks (Phase 5.3)
+    if (this.effects) {
+      this.effects.update(delta, this.physics);
     }
 
     // Follow vehicle with directional sun shadow frustum
