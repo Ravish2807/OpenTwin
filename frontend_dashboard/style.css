@@ -1653,3 +1653,205 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.2);
   margin-right: 4px;
 }
+
+/* ================= DYNAMIC SCENARIOS & MODEL LOADER STYLES ================= */
+.scenario-mode-pills,
+.weather-mode-pills,
+.custom-model-pills {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 3px 6px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.scen-btn,
+.weather-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-tech);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.scen-btn:hover,
+.weather-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.scen-btn.active {
+  background: #00f0ff;
+  color: #050b14;
+  font-weight: 800;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+}
+
+.weather-btn.active {
+  background: #38bdf8;
+  color: #050b14;
+  font-weight: 800;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+
+.btn-outline-cyan {
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  color: #00f0ff;
+  font-family: var(--font-tech);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-cyan:hover {
+  background: rgba(0, 240, 255, 0.25);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+.btn-outline-amber {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #f59e0b;
+  font-family: var(--font-tech);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-amber:hover {
+  background: rgba(245, 158, 11, 0.25);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+}
+
+/* Drag-and-drop file hover highlight */
+.sim3d-viewport-wrapper.drag-active {
+  outline: 3px dashed #00f0ff;
+  outline-offset: -8px;
+}
+
+/* Scenario Telemetry HUD Card (Top Right) */
+.sim3d-scenario-hud {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  background: rgba(10, 15, 30, 0.88);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(0, 240, 255, 0.28);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6), inset 0 0 12px rgba(0, 240, 255, 0.05);
+  border-radius: 10px;
+  padding: 10px 16px;
+  width: 250px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scenario-hud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 6px;
+}
+
+.scenario-hud-title {
+  font-family: var(--font-tech);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #38bdf8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scenario-status-tag {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.scenario-status-tag.armed {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.scenario-status-tag.running,
+.scenario-status-tag.drifting {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  animation: pulse-hud 1.2s infinite;
+}
+
+.scenario-status-tag.completed {
+  background: rgba(0, 240, 255, 0.2);
+  color: #00f0ff;
+  border: 1px solid rgba(0, 240, 255, 0.4);
+}
+
+@keyframes pulse-hud {
+  0%, 100% { opacity: 1.0; }
+  50% { opacity: 0.6; }
+}
+
+.scenario-hud-timer-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.scenario-timer {
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+}
+
+.btn-xs {
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.scenario-hud-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.72rem;
+  font-family: var(--font-tech);
+}
+
+.scenario-hud-details .detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-dim);
+}
+
+.scenario-hud-details .detail-row strong {
+  font-family: var(--font-mono);
+  color: #ffffff;
+}
+

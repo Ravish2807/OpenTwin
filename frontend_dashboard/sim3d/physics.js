@@ -60,6 +60,7 @@ export class PhysicsEngine {
     this.pacejkaC = 1.65;   // Shape factor
     this.pacejkaD = 1.05;   // Peak friction coefficient (mu)
     this.pacejkaE = -0.5;   // Curvature factor
+    this.surfaceFriction = 1.0; // Dynamic Surface Grip Multiplier (1.0 = Dry, 0.62 = Wet, 0.22 = Ice)
 
     // 4 Wheels: FL, FR, RL, RR
     this.wheels = [
@@ -157,10 +158,12 @@ export class PhysicsEngine {
     }
   }
 
-  resetPosition() {
+  resetPosition(x = 0.0, y = this.initialY, z = 0.0, headingAngle = 0.0) {
     if (!this.chassisBody) return;
-    this.chassisBody.setTranslation({ x: 0.0, y: this.initialY, z: 0.0 }, true);
-    this.chassisBody.setRotation({ x: 0.0, y: 0.0, z: 0.0, w: 1.0 }, true);
+    const halfAngle = headingAngle / 2;
+    const rot = { x: 0.0, y: Math.sin(halfAngle), z: 0.0, w: Math.cos(halfAngle) };
+    this.chassisBody.setTranslation({ x, y, z }, true);
+    this.chassisBody.setRotation(rot, true);
     this.chassisBody.setLinvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
     this.chassisBody.setAngvel({ x: 0.0, y: 0.0, z: 0.0 }, true);
     this.setSteering(0.0);
@@ -183,7 +186,12 @@ export class PhysicsEngine {
     if (this.vehicleRig) {
       this.vehicleRig.setBodyPitchRoll(0.0, 0.0);
     }
-    console.log("[Physics] Vehicle reset to starting grid.");
+    console.log(`[Physics] Vehicle repositioned to (${x.toFixed(1)}, ${y.toFixed(1)}, ${z.toFixed(1)}) heading ${(headingAngle * 180 / Math.PI).toFixed(1)}°.`);
+  }
+
+  setSurfaceFriction(muMultiplier) {
+    this.surfaceFriction = Math.max(0.1, Math.min(2.0, muMultiplier));
+    console.log(`[Physics] Dynamic surface friction updated to: ${this.surfaceFriction.toFixed(2)} (Effective μ = ${(this.pacejkaD * this.surfaceFriction).toFixed(2)})`);
   }
 
   computeAckermann(steerAngle) {
@@ -232,7 +240,7 @@ export class PhysicsEngine {
     if (normalForce <= 0) return 0;
     const B = this.pacejkaB;
     const C = this.pacejkaC;
-    const D = this.pacejkaD * normalForce;
+    const D = this.pacejkaD * this.surfaceFriction * normalForce;
     const E = this.pacejkaE;
 
     // F_y = D * sin(C * atan(B * alpha - E * (B * alpha - atan(B * alpha))))
@@ -435,7 +443,7 @@ export class PhysicsEngine {
       }
 
       // 3. Friction Circle Clamping: sqrt(Fx^2 + Fy^2) <= mu * Fz
-      const maxTireGrip = this.pacejkaD * effNormal;
+      const maxTireGrip = this.pacejkaD * this.surfaceFriction * effNormal;
       const totalF = Math.sqrt(fLong * fLong + fLat * fLat);
       if (totalF > maxTireGrip && totalF > 0) {
         const scale = maxTireGrip / totalF;

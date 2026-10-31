@@ -349,11 +349,40 @@
             
             <div class="sim3d-header-controls">
               <div class="camera-mode-pills">
-                <span class="ctrl-label">CAMERA:</span>
-                <button class="cam-btn active" data-cam="chase" id="cam-btn-chase">🎥 Chase Cam</button>
-                <button class="cam-btn" data-cam="orbit" id="cam-btn-orbit">🔄 Free Orbit</button>
-                <button class="cam-btn" data-cam="cockpit" id="cam-btn-cockpit">🏎️ Cockpit Cam</button>
+                <span class="ctrl-label">CAM:</span>
+                <button class="cam-btn active" data-cam="chase" id="cam-btn-chase">🎥 Chase</button>
+                <button class="cam-btn" data-cam="orbit" id="cam-btn-orbit">🔄 Orbit</button>
+                <button class="cam-btn" data-cam="cockpit" id="cam-btn-cockpit">🏎️ Cockpit</button>
               </div>
+
+              <!-- Dynamic Proving Ground Scenario Selector -->
+              <div class="scenario-mode-pills">
+                <span class="ctrl-label">SCENARIO:</span>
+                <button class="scen-btn active" data-scenario="sprint" id="btn-scen-sprint">🏁 0-100 Sprint</button>
+                <button class="scen-btn" data-scenario="slalom" id="btn-scen-slalom">⚡ Slalom</button>
+                <button class="scen-btn" data-scenario="skidpad" id="btn-scen-skidpad">⭕ Skidpad</button>
+                <button class="scen-btn" data-scenario="freeroam" id="btn-scen-freeroam">🛣️ Free Roam</button>
+              </div>
+
+              <!-- Road Surface & Weather Selector -->
+              <div class="weather-mode-pills">
+                <span class="ctrl-label">SURFACE:</span>
+                <button class="weather-btn active" data-weather="dry" id="btn-weather-dry" title="Dry Asphalt (μ=1.05)">☀️ Dry</button>
+                <button class="weather-btn" data-weather="rain" id="btn-weather-rain" title="Wet Rain Surface (μ=0.62)">🌧️ Rain</button>
+                <button class="weather-btn" data-weather="ice" id="btn-weather-ice" title="Icy Low Traction (μ=0.22)">❄️ Ice</button>
+              </div>
+
+              <!-- Custom 3D Vehicle Model Upload & Management -->
+              <div class="custom-model-pills">
+                <input type="file" id="input-custom-model" accept=".glb,.gltf" style="display: none;" />
+                <button class="btn btn-sm btn-outline-cyan" id="btn-load-custom-model" title="Load custom vehicle 3D model (.glb / .gltf) or drag & drop onto canvas">
+                  📁 Custom Model (.glb)
+                </button>
+                <button class="btn btn-sm btn-outline-amber" id="btn-reset-stock-model" style="display: none;" title="Restore default Procedural Cyber GT">
+                  ↺ Stock Car
+                </button>
+              </div>
+
               <div class="sim-mode-pills">
                 <button class="btn btn-sm btn-primary" id="btn-toggle-sim-mode">🎮 Virtual Drive (WASD)</button>
               </div>
@@ -385,6 +414,23 @@
               <div class="hud-stat-box">
                 <span class="hud-stat-label">CAN BUS BRIDGE</span>
                 <span class="hud-stat-num cyan" id="hud-3d-can-tx" style="font-size: 0.82rem; font-weight: 700;">TX ACTIVE (25Hz)</span>
+              </div>
+            </div>
+
+            <!-- Dynamic Proving Ground Scenario Telemetry & Timing HUD (Phase 6) -->
+            <div class="sim3d-scenario-hud" id="scenario-hud">
+              <div class="scenario-hud-header">
+                <span class="scenario-hud-title" id="scenario-title">🏁 0–100 SPRINT / 200M TRAP</span>
+                <span class="scenario-status-tag armed" id="scenario-status">ARMED</span>
+              </div>
+              <div class="scenario-hud-timer-box">
+                <span class="scenario-timer" id="scenario-timer">00:00.00</span>
+                <button class="btn btn-xs btn-outline-cyan" id="btn-restart-scenario" title="Restart Scenario Run (Or press R)">🔄 Restart</button>
+              </div>
+              <div class="scenario-hud-details" id="scenario-details">
+                <div class="detail-row" id="scen-stat-1"><span>0–60 km/h:</span> <strong>--.-- s</strong></div>
+                <div class="detail-row" id="scen-stat-2"><span>0–100 km/h:</span> <strong>--.-- s</strong></div>
+                <div class="detail-row" id="scen-stat-3"><span>200m Trap:</span> <strong>--.-- s</strong></div>
               </div>
             </div>
 
@@ -727,6 +773,55 @@
           btnToggleMode.addEventListener('click', () => {
             if (window.sim3d && window.sim3d.canBridge) {
               window.sim3d.canBridge.toggleMode();
+            }
+          });
+        }
+
+        // Bind Scenario buttons (Phase 6)
+        const scenButtons = document.querySelectorAll('.scen-btn');
+        scenButtons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            scenButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const scen = btn.getAttribute('data-scenario');
+            if (window.sim3d && window.sim3d.scenarioManager) {
+              window.sim3d.scenarioManager.setScenario(scen);
+            }
+          });
+        });
+
+        // Bind Weather / Surface buttons (Phase 6)
+        const weatherButtons = document.querySelectorAll('.weather-btn');
+        weatherButtons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            weatherButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const weather = btn.getAttribute('data-weather');
+            if (window.sim3d && window.sim3d.scenarioManager) {
+              window.sim3d.scenarioManager.setWeather(weather);
+            }
+          });
+        });
+
+        // Bind Custom 3D Vehicle Model Upload & Reset (Phase 6)
+        const inputModel = document.getElementById('input-custom-model');
+        const btnLoadModel = document.getElementById('btn-load-custom-model');
+        const btnResetModel = document.getElementById('btn-reset-stock-model');
+
+        if (btnLoadModel && inputModel) {
+          btnLoadModel.addEventListener('click', () => inputModel.click());
+          inputModel.addEventListener('change', (e) => {
+            const files = e.target.files;
+            if (files && files.length > 0 && window.sim3d) {
+              window.sim3d.loadCustomVehicle(files[0]);
+            }
+          });
+        }
+
+        if (btnResetModel) {
+          btnResetModel.addEventListener('click', () => {
+            if (window.sim3d) {
+              window.sim3d.resetToStockVehicle();
             }
           });
         }

@@ -29,6 +29,9 @@ The following interactive architecture diagram (designed in the **[Archify](http
 | Functional Module | Technology Stack | Capabilities & Scope |
 | :--- | :--- | :--- |
 | **🚗 3D Vehicle Digital Twin** | Three.js (WebGL / WebGPU) | PBR clearcoat lacquer, 2048×2048 PCF soft shadows, multi-cam rig (`Chase`, `Orbit`, `Cockpit`). |
+| **🏎️ Custom 3D Vehicle Loader** | Three.js `GLTFLoader` (GLTF / GLB) | Real-time file picker & drag-and-drop custom `.glb`/`.gltf` model importer; auto-scales to wheelbase ($4.3\text{m}$), automatically rigs separated wheel meshes to Rapier3D suspension and Ackermann steering, adapts projection headlights, with 1-click fallback to procedural Cyber GT. |
+| **⏱️ Dynamic Proving Ground Scenarios** | Analytical Timing & Spatial Sensors | **0–100 km/h Sprint** (speed trap & 200m time), **Slalom Agility** (cone clipping sensors & $+2\text{s}$ penalties), **360° Skidpad** (drift angle $\beta$, lateral G $G_y$, and combo drift score), and **Free Roam**. |
+| **🌧️ Road Surface & Weather Engine** | Dynamic Friction ($\mu$) & Particles | **Dry Asphalt** ($\mu=1.05$, maximum grip), **Wet / Rainy** ($\mu=0.62$, 1800 falling rain streak particles & glossy slick tarmac), and **Icy Snow** ($\mu=0.22$, high-slip low traction surface). |
 | **🏁 Proving Ground & Test Track** | Procedural Geometry & Colliders | 200m sprint runway with metric distance markers, concentric skid pad ($R=10..50\text{m}$), slalom obstacle course, FIA red/white rumble strips, and Rapier3D physical collision barriers. |
 | **💡 Dynamic Lighting & Presets** | Directional & SpotLight Shadows | Dual projector headlights (Off / Low Beam / High Beam) casting real-time 1024×1024 shadows, white reverse backup lamps, and Day / Dusk / Night sky environment presets toggled via <kbd>N</kbd>. |
 | **💨 Tire Smoke & Skidmarks** | Particle System & Quad Mesh Pool | Dynamic smoke particle emitter activated during Pacejka tire slip, buoyant lift, and persistent asphalt rubber skidmarks with FIFO quad strip recycling. |
@@ -57,7 +60,10 @@ When viewing the **🚗 3D Digital Twin** tab, you can drive the car interactive
 | **Handbrake Drift** | <kbd>Space</kbd> | Locks rear wheels, breaks Pacejka lateral tire adhesion into a controlled power slide |
 | **Headlights Toggle** | <kbd>L</kbd> | Cycles dual projector headlights (Off → Low Beam → High Beam) with real-time shadow casting |
 | **Day / Night Preset** | <kbd>N</kbd> | Cycles ambient environment presets (Day → Dusk → Night) adjusting sky color, sun angles, and fog |
-| **Reset Vehicle** | <kbd>R</kbd> | Instantly resets the vehicle translation and orientation back to the starting grid $(0, 0.75, 0)$ |
+| **Reset Vehicle / Run** | <kbd>R</kbd> | Instantly resets the vehicle and current dynamic scenario run back to starting spawn coordinates |
+| **Scenario Selector** | Header Buttons | Switch between **🏁 0-100 Sprint**, **⚡ Slalom Agility**, **⭕ Skidpad Drift**, and **🛣️ Free Roam** |
+| **Surface Weather** | Header Buttons | Toggle between **☀️ Dry Asphalt**, **🌧️ Wet / Rain**, and **❄️ Icy Snow** |
+| **Custom Vehicle** | Header Button / Drop | Click **📁 Custom Model (.glb)** or drag and drop any `.glb` model directly onto the 3D canvas |
 | **Operating Mode** | Header Button | Toggles between **🎮 Virtual Drive (WASD)** (3D $\rightarrow$ CAN) and **📡 CAN Replay Sync Mode** (CAN $\rightarrow$ 3D) |
 | **Camera Views** | Header Pills | Switch between **🎥 Chase Cam**, **🔄 Free Orbit**, and **🏎️ Cockpit Cam** |
 
@@ -265,7 +271,8 @@ OpenTwin/
 │       ├── physics.js           # Rapier3D WASM, raycast suspension, Ackermann & Pacejka
 │       ├── drivetrain.js        # Engine torque curve, 6-speed DCT gearbox & LSD
 │       ├── controls.js          # Interactive WASD driving input controller
-│       ├── effects.js           # Dynamic tire smoke particle emitter & persistent skidmark quad pool
+│       ├── effects.js           # Dynamic tire smoke particle emitter, skidmarks & rain particle system
+│       ├── scenarios.js         # Dynamic Proving Ground scenarios (Sprint, Slalom, Skidpad) & weather
 │       └── can_bridge.js        # 25Hz binary CAN serialization & replay synchronization
 ├── scripts/
 │   ├── setup_vcan.sh            # SocketCAN vcan0 initialization script

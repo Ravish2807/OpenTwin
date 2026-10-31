@@ -239,13 +239,13 @@
   <text x="95" y="507" fill="#00f0ff" font-size="13.5" font-weight="800">🚗 3D Vehicle Digital Twin &amp; Physics</text>
   <text x="78" y="528" fill="#ffffff" font-size="11" font-weight="700">Three.js WebGL &amp; Rapier3D WASM (60 Hz)</text>
   
-  <text x="78" y="550" fill="#a5f3fc" class="mono" font-size="9.5">• PBR Clearcoat Paint &amp; Soft Shadow Maps (2048x2048)</text>
-  <text x="78" y="567" fill="#94a3b8" font-size="9.5">• 4-Wheel Raycast Suspension (k=34 kN/m) &amp; Ackermann Steer</text>
-  <text x="78" y="584" fill="#94a3b8" font-size="9.5">• Pacejka 'Magic Formula' Tire Cornering &amp; Handbrake Drift</text>
-  <text x="78" y="601" fill="#94a3b8" font-size="9.5">• 6-Speed DCT Gearbox, Limited-Slip Diff &amp; Weight Transfer</text>
-  <text x="78" y="618" fill="#94a3b8" font-size="9.5">• 200m Sprint Runway, Slalom Cones &amp; Collision Barriers</text>
-  <text x="78" y="635" fill="#94a3b8" font-size="9.5">• Low/High Beam Headlights &amp; Day/Dusk/Night Ambient Presets</text>
-  <text x="78" y="652" fill="#34d399" font-weight="700" font-size="9.5">• Dynamic Tire Smoke Particles &amp; Persistent Asphalt Skidmarks</text>
+  <text x="78" y="550" fill="#a5f3fc" class="mono" font-size="9.5">• Custom GLTF/GLB Model Loader (Auto-Rigging &amp; Scaling)</text>
+  <text x="78" y="567" fill="#94a3b8" font-size="9.5">• Dynamic Scenarios: 0-100 Sprint, Slalom Agility, Skidpad</text>
+  <text x="78" y="584" fill="#94a3b8" font-size="9.5">• Dynamic Surface Friction &amp; Weather: Dry, Rain, Icy Snow</text>
+  <text x="78" y="601" fill="#94a3b8" font-size="9.5">• 4-Wheel Raycast Suspension (k=34 kN/m) &amp; Ackermann Steer</text>
+  <text x="78" y="618" fill="#94a3b8" font-size="9.5">• Pacejka 'Magic Formula' Tire Cornering &amp; Handbrake Drift</text>
+  <text x="78" y="635" fill="#94a3b8" font-size="9.5">• 6-Speed DCT Gearbox, Limited-Slip Diff &amp; Weight Transfer</text>
+  <text x="78" y="652" fill="#34d399" font-weight="700" font-size="9.5">• Headlight Shadows, Rain Particles, Smoke &amp; Skidmarks</text>
   <text x="78" y="669" fill="#38bdf8" class="mono" font-size="9.5">• 25 Hz Binary Serialization to 0x100 &amp; 0x200 over ws://</text>
   
   <!-- Camera pills inside 3D card -->

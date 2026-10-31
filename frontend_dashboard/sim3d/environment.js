@@ -244,11 +244,39 @@ export class EnvironmentManager {
       coneUnit.add(collar);
 
       coneUnit.position.set(-35.0, 0, z);
+      coneUnit.userData = { initialPos: new THREE.Vector3(-35.0, 0, z), knocked: false, z };
       coneGroup.add(coneUnit);
       this.cones.push(coneUnit);
     }
 
     this.scene.add(coneGroup);
+  }
+
+  resetCones() {
+    for (const c of this.cones) {
+      if (c.userData) {
+        c.userData.knocked = false;
+        c.position.copy(c.userData.initialPos);
+        c.rotation.set(0, 0, 0);
+      }
+    }
+  }
+
+  setSurfaceWeather(weatherMode) {
+    if (!this.groundMesh || !this.groundMesh.material) return;
+    if (weatherMode === 'rain') {
+      this.groundMesh.material.roughness = 0.22;
+      this.groundMesh.material.metalness = 0.45;
+      this.groundMesh.material.needsUpdate = true;
+    } else if (weatherMode === 'ice') {
+      this.groundMesh.material.roughness = 0.12;
+      this.groundMesh.material.metalness = 0.35;
+      this.groundMesh.material.needsUpdate = true;
+    } else {
+      this.groundMesh.material.roughness = 0.85;
+      this.groundMesh.material.metalness = 0.15;
+      this.groundMesh.material.needsUpdate = true;
+    }
   }
 
   setupSafetyBarriers() {

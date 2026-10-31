@@ -83,6 +83,36 @@ export class VisualEffectsManager {
 
     this.skidGeom = new THREE.PlaneGeometry(0.24, 0.8);
     this.skidGeom.rotateX(-Math.PI / 2);
+
+    // --- 3. Dynamic Rain Particle System (Weather Scenarios) ---
+    this.weatherMode = 'dry'; // 'dry' | 'rain' | 'ice'
+    this.maxRainDrops = 1800;
+    this.rainGeo = new THREE.BufferGeometry();
+    this.rainPositions = new Float32Array(this.maxRainDrops * 3);
+    for (let i = 0; i < this.maxRainDrops; i++) {
+      this.rainPositions[i * 3] = (Math.random() - 0.5) * 70;
+      this.rainPositions[i * 3 + 1] = Math.random() * 35;
+      this.rainPositions[i * 3 + 2] = (Math.random() - 0.5) * 70;
+    }
+    this.rainGeo.setAttribute('position', new THREE.BufferAttribute(this.rainPositions, 3));
+    this.rainMat = new THREE.PointsMaterial({
+      color: 0xa5b4fc,
+      size: 0.18,
+      transparent: true,
+      opacity: 0.65,
+      depthWrite: false
+    });
+    this.rainPoints = new THREE.Points(this.rainGeo, this.rainMat);
+    this.rainPoints.frustumCulled = false;
+    this.rainPoints.visible = false;
+    this.scene.add(this.rainPoints);
+  }
+
+  setWeatherMode(mode) {
+    this.weatherMode = mode;
+    if (this.rainPoints) {
+      this.rainPoints.visible = (mode === 'rain');
+    }
   }
 
   spawnSmoke(x, y, z, vx, vy, vz) {
@@ -198,5 +228,24 @@ export class VisualEffectsManager {
     }
 
     this.particleGeo.attributes.position.needsUpdate = true;
+
+    // 3. Update rain particle coordinates around vehicle
+    if (this.weatherMode === 'rain' && this.rainPoints.visible) {
+      const rainPos = this.rainPositions;
+      const vX = cPos.x;
+      const vZ = cPos.z;
+      const fallSpeed = 38.0; // m/s downwards
+
+      for (let i = 0; i < this.maxRainDrops; i++) {
+        rainPos[i * 3 + 1] -= fallSpeed * dt;
+        // Wrap vertically
+        if (rainPos[i * 3 + 1] < 0) {
+          rainPos[i * 3 + 1] = 30 + Math.random() * 5;
+          rainPos[i * 3] = vX + (Math.random() - 0.5) * 60;
+          rainPos[i * 3 + 2] = vZ + (Math.random() - 0.5) * 60;
+        }
+      }
+      this.rainGeo.attributes.position.needsUpdate = true;
+    }
   }
 }

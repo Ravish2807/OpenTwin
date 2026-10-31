@@ -12,6 +12,7 @@ import { PhysicsEngine } from './physics.js';
 import { InputController } from './controls.js';
 import { CANBridge } from './can_bridge.js';
 import { VisualEffectsManager } from './effects.js';
+import { ScenarioManager } from './scenarios.js';
 
 export class Sim3DEngine {
   constructor(containerId) {
@@ -31,6 +32,7 @@ export class Sim3DEngine {
     this.controls = null;
     this.canBridge = null;
     this.effects = null;
+    this.scenarioManager = null;
     this.headlightState = 1; // 0=Off, 1=Low Beam, 2=High Beam
     this.cameraMode = 'chase'; // 'chase' | 'orbit' | 'cockpit'
 
@@ -123,10 +125,16 @@ export class Sim3DEngine {
     // 10. Dynamic Tire Smoke Particles & Persistent Skidmarks (Phase 5.3)
     this.effects = new VisualEffectsManager(this.scene);
 
-    // 11. Handle Viewport Resizing
+    // 11. Dynamic Proving Ground Scenario Engine (Phase 6)
+    this.scenarioManager = new ScenarioManager(this);
+
+    // 12. Setup Drag-and-Drop Model Loading on 3D Container
+    this.setupDragAndDrop();
+
+    // 13. Handle Viewport Resizing
     this.setupResizeObserver();
 
-    // 12. Start Render Loop
+    // 14. Start Render Loop
     this.isInitialized = true;
     this.animate = this.animate.bind(this);
     requestAnimationFrame(this.animate);
@@ -219,6 +227,11 @@ export class Sim3DEngine {
       this.environment.update(this.vehicleGroup.position);
     }
 
+    // Dynamic Proving Ground Scenario Telemetry & Timing (Phase 6)
+    if (this.scenarioManager) {
+      this.scenarioManager.update(delta);
+    }
+
     // Execute user registered update loops (Custom callbacks)
     for (const cb of this.onUpdateCallbacks) {
       cb(delta);
@@ -235,5 +248,81 @@ export class Sim3DEngine {
 
   onUpdate(callback) {
     this.onUpdateCallbacks.push(callback);
+  }
+
+  setupDragAndDrop() {
+    if (!this.container) return;
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      this.container.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.container.classList.add('drag-active');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      this.container.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.container.classList.remove('drag-active');
+      }, false);
+    });
+
+    this.container.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      if (files && files.length > 0) {
+        const file = files[0];
+        if (file.name.toLowerCase().endsWith('.glb') || file.name.toLowerCase().endsWith('.gltf')) {
+          console.log(`[Sim3D] File dropped: ${file.name}`);
+          this.loadCustomVehicle(file);
+        } else {
+          alert("Please drop a valid .glb or .gltf 3D vehicle model.");
+        }
+      }
+    });
+  }
+
+  loadCustomVehicle(fileOrUrl, onProgress, onLoad, onError) {
+    if (!this.vehicleRig) return;
+    const badge = document.getElementById('sim3d-physics-badge');
+    if (badge) {
+      badge.innerText = '⏳ LOADING CUSTOM 3D MODEL...';
+      badge.className = 'badge badge-amber';
+    }
+
+    this.vehicleRig.loadCustomModel(
+      fileOrUrl,
+      onProgress,
+      (meta) => {
+        if (badge) {
+          badge.innerText = `● MODEL: ${meta.lengthMeters}M (${meta.meshCount} MESHES)`;
+          badge.className = 'badge badge-cyan';
+        }
+        const btnReset = document.getElementById('btn-reset-stock-model');
+        if (btnReset) btnReset.style.display = 'inline-flex';
+        if (onLoad) onLoad(meta);
+      },
+      (err) => {
+        if (badge) {
+          badge.innerText = '⚠️ MODEL LOAD FAILED';
+          badge.className = 'badge badge-red';
+        }
+        if (onError) onError(err);
+      }
+    );
+  }
+
+  resetToStockVehicle() {
+    if (!this.vehicleRig) return;
+    this.vehicleRig.resetToStockModel();
+    const badge = document.getElementById('sim3d-physics-badge');
+    if (badge) {
+      badge.innerText = '⚡ RAPIER3D WASM ACTIVE';
+      badge.className = 'badge badge-green';
+    }
+    const btnReset = document.getElementById('btn-reset-stock-model');
+    if (btnReset) btnReset.style.display = 'none';
   }
 }
