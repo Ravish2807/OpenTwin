@@ -1855,3 +1855,484 @@ body {
   color: #ffffff;
 }
 
+/* ================= TAB: ECU NETWORK LAYOUT & ARCHITECTURE ================= */
+.ecu-layout-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ecu-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.ecu-layout-pills {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 3px 6px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ecu-layout-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-tech);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 5px 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.ecu-layout-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.ecu-layout-btn.active {
+  background: var(--theme-accent);
+  color: #050b14;
+  font-weight: 800;
+  box-shadow: 0 0 12px var(--theme-glow);
+}
+
+.ecu-workbench-body {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 1200px) {
+  .ecu-workbench-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Topology Viewport */
+.ecu-topology-viewport {
+  background: radial-gradient(circle at 50% 20%, rgba(13, 21, 39, 0.95) 0%, rgba(5, 8, 17, 0.98) 100%);
+  border: 1px solid rgba(0, 240, 255, 0.18);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.7);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Status Bar */
+.topology-status-bar {
+  display: flex;
+  justify-content: space-between;
+  background: rgba(10, 15, 30, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.topo-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.topo-metric .label {
+  font-family: var(--font-tech);
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  font-weight: 700;
+}
+
+.topo-metric .value {
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+/* Physical CAN Bus Backbone Schematic */
+.can-bus-spine {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 18px 0;
+  padding: 0 10px;
+}
+
+.bus-wires {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 12px;
+  position: relative;
+}
+
+.wire {
+  height: 6px;
+  border-radius: 3px;
+  position: relative;
+}
+
+.wire-can-h {
+  background: linear-gradient(90deg, #10b981, #00f0ff, #10b981);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
+}
+
+.wire-can-l {
+  background: linear-gradient(90deg, #0284c7, #38bdf8, #0284c7);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
+}
+
+.wire-label {
+  position: absolute;
+  right: 12px;
+  top: -14px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+.bus-terminator {
+  background: #1e293b;
+  border: 1.5px solid #00f0ff;
+  border-radius: 6px;
+  padding: 6px 8px;
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
+}
+
+.term-tag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #00f0ff;
+  white-space: nowrap;
+}
+
+/* Node Drop Boxes Grid */
+.ecu-nodes-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  position: relative;
+}
+
+.ecu-node-card {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.node-drop-line {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.node-drop-line.active {
+  background: #00f0ff;
+  box-shadow: 0 0 8px #00f0ff;
+}
+
+.ecu-node-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(0, 240, 255, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 14px rgba(0, 240, 255, 0.2);
+}
+
+.ecu-node-card.selected {
+  border-color: #00f0ff;
+  background: rgba(14, 30, 56, 0.95);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.35), inset 0 0 10px rgba(0, 240, 255, 0.15);
+}
+
+.ecu-node-card.offline {
+  opacity: 0.6;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.ecu-node-card.offline .node-drop-line {
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+}
+
+.node-card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 8px;
+}
+
+.node-icon {
+  font-size: 1.3rem;
+}
+
+.node-title-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.node-name {
+  font-family: var(--font-tech);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.node-id-hex {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+.node-status-pill {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.node-status-pill.online {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.node-status-pill.offline {
+  background: rgba(239, 68, 68, 0.18);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.node-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.72rem;
+  font-family: var(--font-tech);
+}
+
+.node-meta-item {
+  display: flex;
+  justify-content: space-between;
+}
+
+.node-meta-item .lbl {
+  color: var(--text-dim);
+}
+
+.node-meta-item .val {
+  font-weight: 700;
+}
+
+.node-card-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 6px;
+}
+
+.signal-chip {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 2px 5px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: #a5f3fc;
+}
+
+/* Selected Node Details Panel (Right Column) */
+.ecu-node-detail-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--bg-card-border);
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.node-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 12px;
+}
+
+.node-type-pill {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #38bdf8;
+  letter-spacing: 0.8px;
+}
+
+.node-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: #ffffff;
+  margin: 2px 0 4px 0;
+}
+
+.node-id-chip {
+  display: inline-block;
+  background: rgba(0, 240, 255, 0.15);
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #00f0ff;
+  font-weight: 800;
+}
+
+.node-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.spec-item {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.spec-label {
+  font-family: var(--font-tech);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  font-weight: 700;
+}
+
+.spec-val {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.node-signals-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.signals-header {
+  font-family: var(--font-tech);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: var(--text-dim);
+}
+
+.signals-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.signals-table th {
+  background: rgba(0, 0, 0, 0.4);
+  font-family: var(--font-tech);
+  color: var(--text-dim);
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.68rem;
+}
+
+.signals-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.signals-table tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.sig-name code {
+  color: #a5f3fc;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.sig-val {
+  font-family: var(--font-mono);
+  font-weight: 800;
+}
+
+.sig-badge {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.sig-badge.green {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.btn-success {
+  background: #10b981;
+  color: #050b14;
+  border: none;
+  font-weight: 800;
+}
+
+.btn-danger {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  font-weight: 800;
+}
+
+.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.4);
+}
+
+

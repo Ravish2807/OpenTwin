@@ -115,31 +115,35 @@ export class Sim3DEngine {
       if (this.environment) this.environment.setLightingPreset(envPresets[envPresetIdx]);
     };
 
-    // 8. Rapier3D Physics Engine (Phase 2)
-    this.physics = new PhysicsEngine(this.vehicleRig);
-    await this.physics.init();
-
-    // 9. Bidirectional CAN Bus Bridge (Phase 4.1)
+    // 8. Bidirectional CAN Bus Bridge (Phase 4.1)
     this.canBridge = new CANBridge(this);
 
-    // 10. Dynamic Tire Smoke Particles & Persistent Skidmarks (Phase 5.3)
+    // 9. Dynamic Tire Smoke Particles & Persistent Skidmarks (Phase 5.3)
     this.effects = new VisualEffectsManager(this.scene);
 
-    // 11. Dynamic Proving Ground Scenario Engine (Phase 6)
+    // 10. Dynamic Proving Ground Scenario Engine (Phase 6)
     this.scenarioManager = new ScenarioManager(this);
 
-    // 12. Setup Drag-and-Drop Model Loading on 3D Container
+    // 11. Setup Drag-and-Drop Model Loading on 3D Container
     this.setupDragAndDrop();
 
-    // 13. Handle Viewport Resizing
+    // 12. Handle Viewport Resizing
     this.setupResizeObserver();
 
-    // 14. Start Render Loop
+    // 13. Start Render Loop Immediately (Guarantees no black screen)
     this.isInitialized = true;
     this.animate = this.animate.bind(this);
     requestAnimationFrame(this.animate);
+    this.resize();
 
-    console.log("[Sim3D] Complete 3D Digital Twin simulation engine initialized successfully.");
+    // 14. Initialize Rapier3D Physics Engine Asynchronously
+    this.physics = new PhysicsEngine(this.vehicleRig);
+    try {
+      await this.physics.init();
+      console.log("[Sim3D] Complete 3D Digital Twin simulation engine initialized successfully.");
+    } catch (err) {
+      console.warn("[Sim3D] Rapier3D physics init warning:", err);
+    }
   }
 
   setupResizeObserver() {
@@ -152,13 +156,16 @@ export class Sim3DEngine {
 
   resize() {
     if (!this.renderer || !this.camera || !this.container) return;
-    const width = this.container.clientWidth;
-    const height = this.container.clientHeight;
+    const width = this.container.clientWidth || (this.container.parentElement ? this.container.parentElement.clientWidth : 800) || 800;
+    const height = this.container.clientHeight || (this.container.parentElement ? this.container.parentElement.clientHeight : 600) || 600;
     if (width === 0 || height === 0) return;
 
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
+    if (this.scene) {
+      this.renderer.render(this.scene, this.camera);
+    }
   }
 
   setCameraMode(mode) {

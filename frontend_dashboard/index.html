@@ -39,6 +39,9 @@
           <button class="nav-tab" data-tab="sim3d">
             <span class="tab-icon">🚗</span> 3D Digital Twin
           </button>
+          <button class="nav-tab" data-tab="eculayout">
+            <span class="tab-icon">🖧</span> ECU Layout
+          </button>
           <button class="nav-tab" data-tab="oscilloscope">
             <span class="tab-icon">📈</span> Signal Grapher
           </button>
@@ -448,6 +451,109 @@
         </div>
       </section>
 
+      <!-- ================= TAB: ECU NETWORK LAYOUT & ARCHITECTURE ================= -->
+      <section class="tab-content" id="tab-eculayout">
+        <div class="card ecu-layout-card">
+          <div class="card-header">
+            <div class="title-with-pill">
+              <span class="card-title">VEHICLE ELECTRONIC ARCHITECTURE (E/E) &amp; ECU NETWORK TOPOLOGY</span>
+              <span class="badge badge-cyan" id="ecu-active-topology-badge">● DISTRIBUTED CAN 2.0B (500 kbps)</span>
+            </div>
+            
+            <div class="ecu-header-controls">
+              <div class="ecu-layout-pills">
+                <span class="ctrl-label">TOPOLOGY:</span>
+                <button class="ecu-layout-btn active" data-layout="distributed" id="btn-layout-dist">🚗 Distributed CAN</button>
+                <button class="ecu-layout-btn" data-layout="domain" id="btn-layout-domain">⚡ Domain Controller</button>
+                <button class="ecu-layout-btn" data-layout="zonal" id="btn-layout-zonal">🌐 Zonal SDV</button>
+                <button class="ecu-layout-btn" data-layout="ev" id="btn-layout-ev">🔋 EV High-Voltage</button>
+              </div>
+
+              <div class="ecu-actions-group">
+                <button class="btn btn-sm btn-outline-cyan" id="btn-simulate-all-nodes">⚡ Ping All ECUs</button>
+                <button class="btn btn-sm btn-outline-amber" id="btn-reset-ecu-defaults">↺ Reset State</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main ECU Workspace: Split between Visual Bus Topology & Selected Node Matrix -->
+          <div class="ecu-workbench-body">
+            
+            <!-- Left / Top: Interactive Visual Bus Diagram -->
+            <div class="ecu-topology-viewport">
+              <div class="topology-status-bar">
+                <div class="topo-metric">
+                  <span class="label">BUS PROTOCOL</span>
+                  <span class="value cyan" id="topo-bus-proto">ISO 11898-2 Classical CAN</span>
+                </div>
+                <div class="topo-metric">
+                  <span class="label">BAUD RATE</span>
+                  <span class="value" id="topo-baud-rate">500 kbps</span>
+                </div>
+                <div class="topo-metric">
+                  <span class="label">ACTIVE ECUS</span>
+                  <span class="value green" id="topo-active-count">4 / 4 ONLINE</span>
+                </div>
+                <div class="topo-metric">
+                  <span class="label">BUS UTILIZATION</span>
+                  <span class="value amber" id="topo-bus-load">28.4%</span>
+                </div>
+                <div class="topo-metric">
+                  <span class="label">BUS TERMINATION</span>
+                  <span class="value" id="topo-term-res">120 Ω (Split Dual End-Points)</span>
+                </div>
+              </div>
+
+              <!-- Interactive Node Grid / Bus Schematic -->
+              <div class="ecu-bus-schematic" id="ecu-bus-schematic">
+                <!-- Dynamically populated by EcuLayoutManager -->
+              </div>
+            </div>
+
+            <!-- Right / Bottom: Selected Node Details & Signal Matrix -->
+            <div class="ecu-node-detail-panel" id="ecu-node-detail-panel">
+              <div class="node-detail-header">
+                <div class="node-badge-info">
+                  <span class="node-type-pill" id="detail-node-type">POWERTRAIN CONTROLLER</span>
+                  <h3 class="node-title" id="detail-node-name">ECU_ENGINE (Engine Management)</h3>
+                  <span class="node-id-chip" id="detail-node-id">0x100</span>
+                </div>
+                <div class="node-status-actions">
+                  <button class="btn btn-sm btn-danger" id="btn-toggle-node-state">⚠️ Drop Node (Offline)</button>
+                </div>
+              </div>
+
+              <div class="node-specs-grid">
+                <div class="spec-item">
+                  <span class="spec-label">TX Frame ID</span>
+                  <span class="spec-val cyan" id="detail-frame-id">0x100 (256)</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Cycle Time</span>
+                  <span class="spec-val" id="detail-cycle-time">10 ms (100 Hz)</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Data Length (DLC)</span>
+                  <span class="spec-val" id="detail-dlc">8 Bytes</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Payload Type</span>
+                  <span class="spec-val" id="detail-payload-type">Standard DBC Signal</span>
+                </div>
+              </div>
+
+              <div class="node-signals-container">
+                <div class="signals-header">TRANSMITTED SIGNALS &amp; LIVE ENGINEERING TELEMETRY</div>
+                <div class="signals-list-table" id="detail-signals-list">
+                  <!-- Populated dynamically with live signals -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       <!-- ================= TAB 3: SIGNAL OSCILLOSCOPE ================= -->
       <section class="tab-content" id="tab-oscilloscope">
         <div class="card oscilloscope-card">
@@ -742,6 +848,10 @@
     </main>
   </div>
 
+  <script type="module">
+    import { EcuLayoutManager } from './ecu_layout.js';
+    window.ecuLayout = new EcuLayoutManager();
+  </script>
   <script src="app.js"></script>
   <script type="module">
     import { Sim3DEngine } from './sim3d/engine.js';

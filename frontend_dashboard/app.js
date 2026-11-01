@@ -286,6 +286,11 @@ function updateCockpit(data) {
     elements.btnReplayPause.textContent = data.ReplayPaused ? "▶ Resume" : "⏸ Pause";
     elements.btnReplayPause.classList.toggle('active', data.ReplayPaused);
   }
+
+  // Update ECU Network Layout Suite telemetry
+  if (window.ecuLayout && typeof window.ecuLayout.updateTelemetry === 'function') {
+    window.ecuLayout.updateTelemetry(data);
+  }
 }
 
 // ================= OSCILLOSCOPE ENGINE =================
@@ -783,9 +788,16 @@ function setupEventListeners() {
         initOscilloscope();
       } else if (state.activeTab === 'sim3d') {
         if (window.sim3d) {
-          setTimeout(() => window.sim3d.resize(), 50);
+          window.sim3d.resize();
+          setTimeout(() => window.sim3d && window.sim3d.resize(), 50);
+          setTimeout(() => window.sim3d && window.sim3d.resize(), 200);
         } else if (typeof window.initSim3D === 'function') {
           window.initSim3D();
+          setTimeout(() => window.sim3d && window.sim3d.resize(), 100);
+        }
+      } else if (state.activeTab === 'eculayout') {
+        if (window.ecuLayout) {
+          window.ecuLayout.render();
         }
       }
     });

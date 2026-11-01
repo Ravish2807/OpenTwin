@@ -29,6 +29,7 @@ The following interactive architecture diagram (designed in the **[Archify](http
 | Functional Module | Technology Stack | Capabilities & Scope |
 | :--- | :--- | :--- |
 | **🚗 3D Vehicle Digital Twin** | Three.js (WebGL / WebGPU) | PBR clearcoat lacquer, 2048×2048 PCF soft shadows, multi-cam rig (`Chase`, `Orbit`, `Cockpit`). |
+| **🖧 ECU Network Layout Suite** | Interactive SVG & Glass Matrix | Multi-topology automotive E/E architecture explorer: **Classical Distributed CAN (500 kbps)**, **Domain Controller (CAN-FD & Ethernet)**, **Zonal SDV (TSN Ethernet)**, and **EV High-Voltage (800V HV)**; real-time node drop/restore fault injection, live packet counters, and signal pinouts. |
 | **🏎️ Custom 3D Vehicle Loader** | Three.js `GLTFLoader` (GLTF / GLB) | Real-time file picker & drag-and-drop custom `.glb`/`.gltf` model importer; auto-scales to wheelbase ($4.3\text{m}$), automatically rigs separated wheel meshes to Rapier3D suspension and Ackermann steering, adapts projection headlights, with 1-click fallback to procedural Cyber GT. |
 | **⏱️ Dynamic Proving Ground Scenarios** | Analytical Timing & Spatial Sensors | **0–100 km/h Sprint** (speed trap & 200m time), **Slalom Agility** (cone clipping sensors & $+2\text{s}$ penalties), **360° Skidpad** (drift angle $\beta$, lateral G $G_y$, and combo drift score), and **Free Roam**. |
 | **🌧️ Road Surface & Weather Engine** | Dynamic Friction ($\mu$) & Particles | **Dry Asphalt** ($\mu=1.05$, maximum grip), **Wet / Rainy** ($\mu=0.62$, 1800 falling rain streak particles & glossy slick tarmac), and **Icy Snow** ($\mu=0.22$, high-slip low traction surface). |
@@ -261,9 +262,10 @@ OpenTwin/
 │   ├── server.py                # Asynchronous telemetry & WebSocket server
 │   └── requirements.txt         # Python dependencies
 ├── frontend_dashboard/
-│   ├── index.html               # Multi-view cluster, 3D viewport & workbench layout
+│   ├── index.html               # Multi-view cluster, 3D viewport, ECU layout & workbench
 │   ├── style.css                # Dark neon glassmorphic UI, HUD & themes
 │   ├── app.js                   # WebSocket bridge, oscilloscope & cluster telemetry client
+│   ├── ecu_layout.js            # Vehicle E/E architecture, bus schematic & ECU node matrix
 │   └── sim3d/                   # 3D Vehicle Simulation Engine
 │       ├── engine.js            # Three.js WebGL viewport & camera mode controller
 │       ├── environment.js       # Sun lighting rig, 2048x2048 soft shadows & proving ground
