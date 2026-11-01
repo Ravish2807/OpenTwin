@@ -206,8 +206,9 @@ function updateSpeedGauge(speed) {
 }
 
 function updateCockpit(data) {
-  updateRPMGauge(data.EngineSpeed || 0);
-  updateSpeedGauge(data.VehicleSpeed || 0);
+  if (!data) return;
+  if (data.EngineSpeed !== undefined) updateRPMGauge(Number(data.EngineSpeed));
+  if (data.VehicleSpeed !== undefined) updateSpeedGauge(Number(data.VehicleSpeed));
 
   // Transmission Gear
   const currentGear = data.Gear || "P";

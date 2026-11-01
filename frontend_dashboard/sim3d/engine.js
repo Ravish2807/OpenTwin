@@ -117,6 +117,9 @@ export class Sim3DEngine {
 
     // 8. Bidirectional CAN Bus Bridge (Phase 4.1)
     this.canBridge = new CANBridge(this);
+    if (window.ws) {
+      this.canBridge.setWebSocket(window.ws);
+    }
 
     // 9. Dynamic Tire Smoke Particles & Persistent Skidmarks (Phase 5.3)
     this.effects = new VisualEffectsManager(this.scene);

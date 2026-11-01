@@ -9,7 +9,7 @@ export class CANBridge {
   constructor(simEngine) {
     this.simEngine = simEngine;
     this.ws = null;
-    this.injectionMode = true; // true = 3D drives CAN (Simulator), false = CAN drives 3D (Replay)
+    this.injectionMode = false; // false = Replay Receiver (RX sync default), true = 3D drives CAN (Simulator)
     this.txRateHz = 25; // 25 Hz CAN injection frequency (40ms interval)
     this.txTimer = 0.0;
     this.txInterval = 1.0 / this.txRateHz;
@@ -22,12 +22,11 @@ export class CANBridge {
 
   setWebSocket(ws) {
     this.ws = ws;
+    // Reflect mode state on UI upon socket connection
+    this.updateUIStatus();
   }
 
-  setInjectionMode(enabled) {
-    this.injectionMode = enabled;
-    console.log(`[CANBridge] Operating Mode: ${this.injectionMode ? "3D Simulator (TX)" : "Replay Receiver (RX)"}`);
-    
+  updateUIStatus() {
     const hudCan = document.getElementById('hud-3d-can-tx');
     const toggleBtn = document.getElementById('btn-toggle-sim-mode');
 
@@ -50,6 +49,27 @@ export class CANBridge {
         toggleBtn.className = "btn btn-sm btn-outline";
       }
     }
+  }
+
+  setInjectionMode(enabled) {
+    this.injectionMode = enabled;
+    console.log(`[CANBridge] Operating Mode: ${this.injectionMode ? "3D Simulator (TX)" : "Replay Receiver (RX)"}`);
+    
+    const ws = this.ws || window.ws;
+
+    if (this.injectionMode) {
+      // Pause backend log replay so manual driving doesn't collide with log frames
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ action: "replay_control", cmd: "pause" }));
+      }
+    } else {
+      // Resume backend log replay
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ action: "replay_control", cmd: "resume" }));
+      }
+    }
+
+    this.updateUIStatus();
 
     if (this.onStatusChange) {
       this.onStatusChange(this.injectionMode);
