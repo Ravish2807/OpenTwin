@@ -197,54 +197,83 @@ export class CANBridge {
       return;
     }
 
-    const now = performance.now();
-    const dt = Math.min((now - this.lastTelemetryTime) / 1000.0, 0.1);
-    this.lastTelemetryTime = now;
-
     const speedKmh = Number(data.VehicleSpeed || 0);
     const rpm = Number(data.EngineSpeed || 850);
     const steerDeg = Number(data.SteeringAngle || 0);
     const brakeActive = Boolean(data.BrakeActive);
     const gear = data.Gear ?? 'D';
 
-    const speedMs = speedKmh / 3.6;
-    const steerRad = (steerDeg * Math.PI) / 180.0;
+    // Store target values for smooth 60fps frame interpolation
+    this.targetSpeedKmh = speedKmh;
+    this.targetRpm = rpm;
+    this.targetSteerDeg = steerDeg;
+    this.isBraking = brakeActive;
+    this.gear = gear;
 
-    // Kinematic bicycle vehicle advance
+    // Update 3D HUD telemetry immediately
+    const speedElem = document.getElementById('hud-3d-speed');
+    const rpmElem = document.getElementById('hud-3d-rpm');
+    const gearElem = document.getElementById('hud-3d-gear');
+    const steerElem = document.getElementById('hud-3d-steer');
+    const hudCan = document.getElementById('hud-3d-can-tx');
+
+    if (speedElem) speedElem.innerHTML = `${Math.round(speedKmh)}<span class="unit">KM/H</span>`;
+    if (rpmElem) rpmElem.innerText = `${Math.round(rpm)}`;
+    if (gearElem) gearElem.innerText = `${gear}`;
+    if (steerElem) steerElem.innerText = `${steerDeg.toFixed(1)}°`;
+    if (hudCan) {
+      hudCan.innerText = "CAN RX: SYNCED (REPLAY)";
+      hudCan.className = "hud-stat-num amber";
+    }
+  }
+
+  /**
+   * Smoothly advances 3D vehicle motion on every animation frame during Replay Mode.
+   */
+  updateReplayMotion(dt) {
+    if (this.injectionMode || !this.simEngine || !this.simEngine.vehicleGroup) {
+      return;
+    }
+
     const vehicle = this.simEngine.vehicleGroup;
-    if (vehicle) {
-      const yawRate = (speedMs / 2.6) * Math.tan(steerRad * 0.45);
-      vehicle.rotation.y += yawRate * dt;
+    const rig = this.simEngine.vehicleRig;
 
-      const forwardVec = new THREE.Vector3(0, 0, 1).applyQuaternion(vehicle.quaternion);
-      vehicle.position.addScaledVector(forwardVec, speedMs * dt);
+    // Smoothly interpolate current speed and steering angle
+    this.currentSpeedKmh = THREE.MathUtils.lerp(this.currentSpeedKmh || 0, this.targetSpeedKmh || 0, dt * 8.0);
+    this.currentSteerDeg = THREE.MathUtils.lerp(this.currentSteerDeg || 0, this.targetSteerDeg || 0, dt * 6.0);
 
-      // Spin visual wheels and apply steering
+    const speedMs = this.currentSpeedKmh / 3.6;
+    const steerRad = (this.currentSteerDeg * Math.PI) / 180.0;
+
+    // Kinematic steering yaw rate advance
+    const yawRate = (speedMs / 2.6) * Math.tan(steerRad * 0.45);
+    vehicle.rotation.y += yawRate * dt;
+
+    // Forward translation along vehicle orientation
+    const forwardVec = new THREE.Vector3(0, 0, 1).applyQuaternion(vehicle.quaternion);
+    vehicle.position.addScaledVector(forwardVec, speedMs * dt);
+    vehicle.position.y = 0.0;
+
+    // Loop runway after completing 210m sprint track
+    if (vehicle.position.z > 210.0) {
+      vehicle.position.set(0, 0, 0);
+      vehicle.rotation.set(0, 0, 0);
+    } else if (vehicle.position.z < -60.0) {
+      vehicle.position.set(0, 0, 0);
+      vehicle.rotation.set(0, 0, 0);
+    }
+
+    // Spin wheels and update steering geometry visually
+    if (rig) {
       const spinDelta = (speedMs / 0.34) * dt;
-      this.simEngine.vehicleRig.spinWheels(spinDelta);
-      this.simEngine.vehicleRig.setSteering(steerRad * 0.45, steerRad * 0.45);
-      this.simEngine.vehicleRig.setBraking(brakeActive);
+      rig.spinWheels(spinDelta);
+      rig.setSteering(steerRad * 0.45, steerRad * 0.45);
+      rig.setBraking(this.isBraking);
 
-      // Pitch & Roll kinematic lean from speed & steering
-      const pitch = THREE.MathUtils.clamp((brakeActive ? 0.03 : -0.015 * (speedMs / 40)), -0.05, 0.05);
-      const roll = THREE.MathUtils.clamp(steerRad * 0.08 * (speedMs / 25), -0.07, 0.07);
-      this.simEngine.vehicleRig.setBodyPitchRoll(pitch, roll);
-
-      // Update 3D HUD telemetry
-      const speedElem = document.getElementById('hud-3d-speed');
-      const rpmElem = document.getElementById('hud-3d-rpm');
-      const gearElem = document.getElementById('hud-3d-gear');
-      const steerElem = document.getElementById('hud-3d-steer');
-      const hudCan = document.getElementById('hud-3d-can-tx');
-
-      if (speedElem) speedElem.innerHTML = `${Math.round(speedKmh)}<span class="unit">KM/H</span>`;
-      if (rpmElem) rpmElem.innerText = `${Math.round(rpm)}`;
-      if (gearElem) gearElem.innerText = `${gear}`;
-      if (steerElem) steerElem.innerText = `${steerDeg.toFixed(1)}°`;
-      if (hudCan) {
-        hudCan.innerText = "CAN RX: SYNCED (REPLAY)";
-        hudCan.className = "hud-stat-num amber";
-      }
+      // Pitch & Roll dynamic chassis lean
+      const pitch = THREE.MathUtils.clamp((this.isBraking ? 0.025 : -0.012 * (speedMs / 40)), -0.04, 0.04);
+      const roll = THREE.MathUtils.clamp(steerRad * 0.06 * (speedMs / 25), -0.06, 0.06);
+      rig.setBodyPitchRoll(pitch, roll);
     }
   }
 }

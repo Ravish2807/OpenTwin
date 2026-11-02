@@ -214,17 +214,34 @@ export class Sim3DEngine {
       this.controls.update(delta);
     }
 
-    // Step Physics Simulation (Phase 2)
-    if (this.physics && this.physics.isReady) {
-      this.physics.step(delta, this.controls);
-      if (this.vehicleRig) {
-        this.vehicleRig.setReverse(this.physics.isReversing);
-      }
-    }
+    const isVirtualDrive = Boolean(this.canBridge && this.canBridge.injectionMode);
 
-    // Transmit Live CAN Frames (Phase 4.1)
-    if (this.canBridge) {
-      this.canBridge.update(delta);
+    if (isVirtualDrive) {
+      // 1. Virtual Drive Mode (WASD Manual Driving with Rapier3D WASM Physics)
+      if (this.physics && this.physics.isReady) {
+        this.physics.step(delta, this.controls);
+        if (this.vehicleRig) {
+          this.vehicleRig.setReverse(this.physics.isReversing);
+        }
+      }
+      // Transmit Live CAN Frames (Phase 4.1)
+      if (this.canBridge) {
+        this.canBridge.update(delta);
+      }
+    } else {
+      // 2. Replay Sync Mode (CAN Telemetry Drives Vehicle Smoothly at 60 FPS)
+      if (this.canBridge) {
+        this.canBridge.updateReplayMotion(delta);
+      }
+      // Keep physics chassis in sync so switching to Virtual Drive is seamless
+      if (this.physics && this.physics.isReady && this.vehicleGroup) {
+        this.physics.resetPosition(
+          this.vehicleGroup.position.x,
+          0.35,
+          this.vehicleGroup.position.z,
+          this.vehicleGroup.rotation.y
+        );
+      }
     }
 
     // Dynamic Tire Smoke & Skidmarks (Phase 5.3)

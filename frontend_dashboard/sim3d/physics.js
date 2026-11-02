@@ -20,16 +20,16 @@ export class PhysicsEngine {
 
     // Vehicle physical parameters
     this.vehicleMass = 1450; // kg
-    this.initialY = 0.75;    // Initial drop height
+    this.initialY = 0.35;    // Initial drop height
 
     // Geometry parameters (Meters)
     this.wheelbase = 2.6;
     this.trackWidth = 1.6;
     this.wheelbaseHalf = this.wheelbase / 2; // 1.3m
     this.trackHalf = this.trackWidth / 2;    // 0.8m
-    this.mountY = 0.42;
+    this.mountY = 0.12;
     this.wheelRadius = 0.34;
-    this.suspensionRestLength = 0.48; // meters
+    this.suspensionRestLength = 0.52; // meters
     this.springStiffness = 34000;     // N/m
     this.springDamping = 4400;        // N*s/m
 
@@ -271,15 +271,26 @@ export class PhysicsEngine {
       const maxRayDist = this.suspensionRestLength + 0.25;
       const hit = this.world.castRay(ray, maxRayDist, true, undefined, undefined, this.chassisCollider);
 
+      let dist = maxRayDist;
+      let hasContact = false;
+
       if (hit && hit.timeOfImpact < this.suspensionRestLength) {
-        const dist = hit.timeOfImpact;
-        const comp = this.suspensionRestLength - dist;
+        dist = hit.timeOfImpact;
+        hasContact = true;
+      } else if (worldMount.y > 0 && worldMount.y < this.suspensionRestLength) {
+        // Analytical ground plane fallback (ground top at y=0.0)
+        dist = worldMount.y;
+        hasContact = true;
+      }
+
+      if (hasContact) {
+        const comp = Math.max(0.01, this.suspensionRestLength - dist);
         const springVel = (comp - wheel.prevComp) / Math.max(dt, 0.001);
         wheel.prevComp = comp;
         wheel.comp = comp;
         wheel.contact = true;
 
-        const forceMag = Math.max(0, this.springStiffness * comp + this.springDamping * springVel);
+        const forceMag = Math.max(120, this.springStiffness * comp + this.springDamping * springVel);
         wheel.normalForce = forceMag;
 
         // Apply suspension spring impulse
@@ -463,6 +474,30 @@ export class PhysicsEngine {
       this.chassisBody.applyImpulseAtPoint(impulse, { x: contactPatch.x, y: contactPatch.y, z: contactPatch.z }, true);
     }
 
+    // 4. Responsive Virtual Drive powertrain & steering assist
+    if (controls) {
+      if (controls.throttle > 0.05 && !this.isReversing) {
+        const driveImpulse = controls.throttle * 8500 * dt;
+        this.chassisBody.applyImpulse({
+          x: chassisFwd.x * driveImpulse,
+          y: 0,
+          z: chassisFwd.z * driveImpulse
+        }, true);
+      } else if (controls.backward || this.isReversing) {
+        const revImpulse = (controls.backward ? 5500 : controls.throttle * 5500) * dt;
+        this.chassisBody.applyImpulse({
+          x: -chassisFwd.x * revImpulse,
+          y: 0,
+          z: -chassisFwd.z * revImpulse
+        }, true);
+      }
+
+      if (Math.abs(controls.steer) > 0.05) {
+        const steerTorque = -controls.steer * 4000 * dt * Math.min(1.0, Math.abs(forwardSpeed) / 4.0 + 0.35);
+        this.chassisBody.applyTorqueImpulse({ x: 0, y: steerTorque, z: 0 }, true);
+      }
+    }
+
     // Spin visual wheels based on forward motion
     const spinDelta = (forwardSpeed / this.wheelRadius) * dt;
     if (this.vehicleRig) {
@@ -518,7 +553,7 @@ export class PhysicsEngine {
     const trans = this.chassisBody.translation();
     const rot = this.chassisBody.rotation();
 
-    this.vehicleRig.root.position.set(trans.x, trans.y, trans.z);
+    this.vehicleRig.root.position.set(trans.x, Math.max(0.0, trans.y - 0.35), trans.z);
     this.vehicleRig.root.quaternion.set(rot.x, rot.y, rot.z, rot.w);
   }
 }
