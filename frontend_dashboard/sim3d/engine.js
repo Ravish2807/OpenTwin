@@ -185,6 +185,15 @@ export class Sim3DEngine {
   updateCamera(delta) {
     if (!this.vehicleGroup) return;
 
+    const speedKmh = this.canBridge ? (this.canBridge.currentSpeedKmh || 0) : 0;
+
+    // Dynamic FOV sensation of speed (55 deg idle -> 66 deg at high speed)
+    if (this.camera) {
+      const targetFov = 55 + Math.min(12, (speedKmh / 100.0) * 11);
+      this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, targetFov, delta * 4.0);
+      this.camera.updateProjectionMatrix();
+    }
+
     if (this.cameraMode === 'chase') {
       const idealPosition = this.chaseOffset.clone().applyQuaternion(this.vehicleGroup.quaternion).add(this.vehicleGroup.position);
       const idealLookAt = this.chaseLookAtOffset.clone().applyQuaternion(this.vehicleGroup.quaternion).add(this.vehicleGroup.position);
@@ -192,6 +201,12 @@ export class Sim3DEngine {
       const t = 1.0 - Math.pow(0.001, delta);
       this.camera.position.lerp(idealPosition, t);
       this.camera.lookAt(idealLookAt);
+
+      // Subtle high-speed camera road shake
+      if (speedKmh > 10) {
+        const shake = (speedKmh / 200.0) * 0.015 * (Math.random() - 0.5);
+        this.camera.position.y += shake;
+      }
     } else if (this.cameraMode === 'cockpit') {
       const eyePosition = this.cockpitOffset.clone().applyQuaternion(this.vehicleGroup.quaternion).add(this.vehicleGroup.position);
       const targetLookAt = this.cockpitLookAtOffset.clone().applyQuaternion(this.vehicleGroup.quaternion).add(this.vehicleGroup.position);
@@ -232,15 +247,6 @@ export class Sim3DEngine {
       // 2. Replay Sync Mode (CAN Telemetry Drives Vehicle Smoothly at 60 FPS)
       if (this.canBridge) {
         this.canBridge.updateReplayMotion(delta);
-      }
-      // Keep physics chassis in sync so switching to Virtual Drive is seamless
-      if (this.physics && this.physics.isReady && this.vehicleGroup) {
-        this.physics.resetPosition(
-          this.vehicleGroup.position.x,
-          0.35,
-          this.vehicleGroup.position.z,
-          this.vehicleGroup.rotation.y
-        );
       }
     }
 

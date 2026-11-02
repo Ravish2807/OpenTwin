@@ -245,34 +245,41 @@ export class CANBridge {
     const speedMs = this.currentSpeedKmh / 3.6;
     const steerRad = (this.currentSteerDeg * Math.PI) / 180.0;
 
-    // Kinematic steering yaw rate advance
-    const yawRate = (speedMs / 2.6) * Math.tan(steerRad * 0.45);
-    vehicle.rotation.y += yawRate * dt;
+    // Kinematic steering yaw & lane change
+    const targetHeading = THREE.MathUtils.clamp(steerRad * 0.35, -0.45, 0.45);
+    vehicle.rotation.y = THREE.MathUtils.lerp(vehicle.rotation.y, targetHeading, dt * 5.0);
 
-    // Forward translation along vehicle orientation
-    const forwardVec = new THREE.Vector3(0, 0, 1).applyQuaternion(vehicle.quaternion);
-    vehicle.position.addScaledVector(forwardVec, speedMs * dt);
+    // Direct forward translation along track axis (+Z) with lane lateral offset (+X)
+    vehicle.position.z += Math.max(0, speedMs * dt);
+    const targetLaneX = THREE.MathUtils.clamp(-this.currentSteerDeg * 0.12, -4.2, 4.2);
+    vehicle.position.x = THREE.MathUtils.lerp(vehicle.position.x, targetLaneX, dt * 4.0);
     vehicle.position.y = 0.0;
 
-    // Loop runway after completing 210m sprint track
-    if (vehicle.position.z > 210.0) {
-      vehicle.position.set(0, 0, 0);
-      vehicle.rotation.set(0, 0, 0);
-    } else if (vehicle.position.z < -60.0) {
-      vehicle.position.set(0, 0, 0);
-      vehicle.rotation.set(0, 0, 0);
+    // Seamless track wrap after completing 1150m sprint track
+    if (vehicle.position.z > 1150.0) {
+      vehicle.position.z = 0.0;
+      vehicle.position.x = 0.0;
+    } else if (vehicle.position.z < -20.0) {
+      vehicle.position.z = 0.0;
+      vehicle.position.x = 0.0;
+    }
+
+    // Update 3D distance readout in HUD
+    const distElem = document.getElementById('hud-3d-dist');
+    if (distElem) {
+      distElem.innerHTML = `${Math.round(vehicle.position.z)} <small>m</small>`;
     }
 
     // Spin wheels and update steering geometry visually
     if (rig) {
       const spinDelta = (speedMs / 0.34) * dt;
       rig.spinWheels(spinDelta);
-      rig.setSteering(steerRad * 0.45, steerRad * 0.45);
+      rig.setSteering(steerRad * 0.8, steerRad * 0.8);
       rig.setBraking(this.isBraking);
 
       // Pitch & Roll dynamic chassis lean
-      const pitch = THREE.MathUtils.clamp((this.isBraking ? 0.025 : -0.012 * (speedMs / 40)), -0.04, 0.04);
-      const roll = THREE.MathUtils.clamp(steerRad * 0.06 * (speedMs / 25), -0.06, 0.06);
+      const pitch = THREE.MathUtils.clamp((this.isBraking ? 0.03 : -0.015 * (speedMs / 40)), -0.05, 0.05);
+      const roll = THREE.MathUtils.clamp(steerRad * 0.08 * (speedMs / 25), -0.07, 0.07);
       rig.setBodyPitchRoll(pitch, roll);
     }
   }

@@ -341,7 +341,15 @@ class OpenTwinServer:
         # Determine operating mode:
         # If replay_file provided, run internal replayer alongside decoder.
         # Otherwise, connect to live CAN interface (socketcan/virtual).
-        app = web.Application()
+        @web.middleware
+        async def no_cache_middleware(request, handler):
+            resp = await handler(request)
+            resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            resp.headers["Pragma"] = "no-cache"
+            resp.headers["Expires"] = "0"
+            return resp
+
+        app = web.Application(middlewares=[no_cache_middleware])
         app.router.add_get("/ws", self.websocket_handler)
 
         frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend_dashboard"))

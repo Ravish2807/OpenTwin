@@ -166,39 +166,95 @@ export class EnvironmentManager {
   setupRunwayLanes() {
     const runwayGroup = new THREE.Group();
 
-    // 200m Sprint Runway Lane Markings
+    // 1200m Extended Proving Ground Runway
     const laneWidth = 12.0;
-    const runwayLength = 200.0;
+    const runwayLength = 1200.0;
 
     // Outer Boundary Lines (Solid White)
-    const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 });
-    const borderLeft = new THREE.Mesh(new THREE.PlaneGeometry(0.25, runwayLength), lineMat);
+    const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.75 });
+    const borderLeft = new THREE.Mesh(new THREE.PlaneGeometry(0.3, runwayLength), lineMat);
     borderLeft.rotation.x = -Math.PI / 2;
     borderLeft.position.set(-laneWidth / 2, 0.015, runwayLength / 2);
     runwayGroup.add(borderLeft);
 
-    const borderRight = new THREE.Mesh(new THREE.PlaneGeometry(0.25, runwayLength), lineMat);
+    const borderRight = new THREE.Mesh(new THREE.PlaneGeometry(0.3, runwayLength), lineMat);
     borderRight.rotation.x = -Math.PI / 2;
     borderRight.position.set(laneWidth / 2, 0.015, runwayLength / 2);
     runwayGroup.add(borderRight);
 
-    // Center Dashed Dividing Line (Cyan Glow)
-    const dashMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.6 });
-    for (let z = 5; z < runwayLength; z += 10) {
-      const dash = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 5), dashMat);
+    // High-Contrast Red & White Racing Rumble Strips (Kerbs) along both edges
+    const redKerbMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+    const whiteKerbMat = new THREE.MeshBasicMaterial({ color: 0xf8fafc });
+    const kerbWidth = 0.8;
+    const kerbSegmentLen = 2.0;
+
+    for (let z = 0; z < runwayLength; z += kerbSegmentLen) {
+      const isRed = Math.floor(z / kerbSegmentLen) % 2 === 0;
+      const mat = isRed ? redKerbMat : whiteKerbMat;
+
+      // Left kerb
+      const kLeft = new THREE.Mesh(new THREE.PlaneGeometry(kerbWidth, kerbSegmentLen), mat);
+      kLeft.rotation.x = -Math.PI / 2;
+      kLeft.position.set(-laneWidth / 2 - kerbWidth / 2, 0.018, z + kerbSegmentLen / 2);
+      runwayGroup.add(kLeft);
+
+      // Right kerb
+      const kRight = new THREE.Mesh(new THREE.PlaneGeometry(kerbWidth, kerbSegmentLen), mat);
+      kRight.rotation.x = -Math.PI / 2;
+      kRight.position.set(laneWidth / 2 + kerbWidth / 2, 0.018, z + kerbSegmentLen / 2);
+      runwayGroup.add(kRight);
+    }
+
+    // Center Dashed Dividing Line (Cyan Glow) every 4 meters
+    const dashMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.85 });
+    for (let z = 2; z < runwayLength; z += 6) {
+      const dash = new THREE.Mesh(new THREE.PlaneGeometry(0.25, 3.5), dashMat);
       dash.rotation.x = -Math.PI / 2;
-      dash.position.set(0, 0.015, z);
+      dash.position.set(0, 0.02, z);
       runwayGroup.add(dash);
     }
 
-    // Distance Milestone Markers on Track (50m, 100m, 150m, 200m)
-    const milestones = [50, 100, 150, 200];
-    const markerMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.7 });
-    for (const dist of milestones) {
-      const bar = new THREE.Mesh(new THREE.PlaneGeometry(laneWidth, 0.6), markerMat);
-      bar.rotation.x = -Math.PI / 2;
-      bar.position.set(0, 0.016, dist);
-      runwayGroup.add(bar);
+    // Roadside High-Tech Illuminated Light Gantries & Pylons every 25 meters
+    const postMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.9, roughness: 0.2 });
+    const lampGlowMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+    const milestoneMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+
+    for (let z = 25; z < runwayLength; z += 25) {
+      // Left Lamp Post
+      const postL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 4.2, 12), postMat);
+      postL.position.set(-laneWidth / 2 - 1.8, 2.1, z);
+      runwayGroup.add(postL);
+
+      const lampL = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.15, 0.4), lampGlowMat);
+      lampL.position.set(-laneWidth / 2 - 1.4, 4.2, z);
+      runwayGroup.add(lampL);
+
+      // Right Lamp Post
+      const postR = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 4.2, 12), postMat);
+      postR.position.set(laneWidth / 2 + 1.8, 2.1, z);
+      runwayGroup.add(postR);
+
+      const lampR = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.15, 0.4), lampGlowMat);
+      lampR.position.set(laneWidth / 2 + 1.4, 4.2, z);
+      runwayGroup.add(lampR);
+
+      // Distance Milestone Bar across track every 50 meters
+      if (z % 50 === 0) {
+        const bar = new THREE.Mesh(new THREE.PlaneGeometry(laneWidth, 0.8), milestoneMat);
+        bar.rotation.x = -Math.PI / 2;
+        bar.position.set(0, 0.022, z);
+        runwayGroup.add(bar);
+
+        // Overhead Overhead Gantry Frame at 50m intervals
+        const gantryBeam = new THREE.Mesh(new THREE.BoxGeometry(laneWidth + 4.0, 0.25, 0.3), postMat);
+        gantryBeam.position.set(0, 4.2, z);
+        runwayGroup.add(gantryBeam);
+
+        const gantryLight = new THREE.Mesh(new THREE.PlaneGeometry(laneWidth, 0.12), lampGlowMat);
+        gantryLight.position.set(0, 4.05, z);
+        gantryLight.rotation.x = Math.PI / 2;
+        runwayGroup.add(gantryLight);
+      }
     }
 
     this.scene.add(runwayGroup);

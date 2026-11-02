@@ -403,6 +403,10 @@
                 <span class="hud-stat-num cyan" id="hud-3d-speed">0.0 <small>km/h</small></span>
               </div>
               <div class="hud-stat-box">
+                <span class="hud-stat-label">DISTANCE</span>
+                <span class="hud-stat-num cyan" id="hud-3d-dist">0 <small>m</small></span>
+              </div>
+              <div class="hud-stat-box">
                 <span class="hud-stat-label">ENGINE RPM</span>
                 <span class="hud-stat-num" id="hud-3d-rpm">850 <small>RPM</small></span>
               </div>
@@ -849,12 +853,12 @@
   </div>
 
   <script type="module">
-    import { EcuLayoutManager } from './ecu_layout.js';
+    import { EcuLayoutManager } from './ecu_layout.js?v=2.6';
     window.ecuLayout = new EcuLayoutManager();
   </script>
-  <script src="app.js"></script>
+  <script src="app.js?v=2.6"></script>
   <script type="module">
-    import { Sim3DEngine } from './sim3d/engine.js';
+    import { Sim3DEngine } from './sim3d/engine.js?v=2.6';
 
     function initSim3D() {
       if (window.sim3d) return;
