@@ -224,6 +224,15 @@ export class Sim3DEngine {
     requestAnimationFrame(this.animate);
     const delta = Math.min(this.clock.getDelta(), 0.1);
 
+    // Self-healing automatic resize check when container becomes visible (e.g. switching tabs)
+    if (this.container && this.container.clientWidth > 0 && this.renderer) {
+      const curW = this.renderer.domElement.clientWidth;
+      const curH = this.renderer.domElement.clientHeight;
+      if (Math.abs(curW - this.container.clientWidth) > 4 || Math.abs(curH - this.container.clientHeight) > 4) {
+        this.resize();
+      }
+    }
+
     // Update Input State (Phase 2.4)
     if (this.controls) {
       this.controls.update(delta);

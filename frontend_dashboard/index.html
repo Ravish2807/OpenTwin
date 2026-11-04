@@ -465,6 +465,13 @@
             </div>
             
             <div class="ecu-header-controls">
+              <div class="ecu-view-mode-pills">
+                <span class="ctrl-label">AUTOSAR VIEW:</span>
+                <button class="ecu-view-btn active" id="btn-view-autosar">🏛️ Layered Architecture (ASW/RTE/BSW)</button>
+                <button class="ecu-view-btn" id="btn-view-topology">🖧 Physical Bus Topology</button>
+                <button class="ecu-view-btn" id="btn-view-arxml">📄 ARXML Schema (AUTOSAR 4.4)</button>
+              </div>
+
               <div class="ecu-layout-pills">
                 <span class="ctrl-label">TOPOLOGY:</span>
                 <button class="ecu-layout-btn active" data-layout="distributed" id="btn-layout-dist">🚗 Distributed CAN</button>
@@ -508,8 +515,18 @@
                 </div>
               </div>
 
+              <!-- Official AUTOSAR Layered Architecture Container -->
+              <div class="ecu-autosar-container" id="ecu-autosar-container">
+                <!-- Dynamically populated by EcuLayoutManager -->
+              </div>
+
               <!-- Interactive Node Grid / Bus Schematic -->
-              <div class="ecu-bus-schematic" id="ecu-bus-schematic">
+              <div class="ecu-bus-schematic" id="ecu-bus-schematic" style="display: none;">
+                <!-- Dynamically populated by EcuLayoutManager -->
+              </div>
+
+              <!-- AUTOSAR Formal ARXML Inspector Container -->
+              <div class="ecu-arxml-container" id="ecu-arxml-container" style="display: none;">
                 <!-- Dynamically populated by EcuLayoutManager -->
               </div>
             </div>
@@ -853,12 +870,12 @@
   </div>
 
   <script type="module">
-    import { EcuLayoutManager } from './ecu_layout.js?v=2.6';
+    import { EcuLayoutManager } from './ecu_layout.js?v=2.7';
     window.ecuLayout = new EcuLayoutManager();
   </script>
-  <script src="app.js?v=2.6"></script>
+  <script src="app.js?v=2.7"></script>
   <script type="module">
-    import { Sim3DEngine } from './sim3d/engine.js?v=2.6';
+    import { Sim3DEngine } from './sim3d/engine.js?v=2.7';
 
     function initSim3D() {
       if (window.sim3d) return;

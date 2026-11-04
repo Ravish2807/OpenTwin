@@ -2336,3 +2336,843 @@ body {
 }
 
 
+
+/* ========================================================================== */
+/* AUTOSAR CLASSIC & ADAPTIVE ARCHITECTURE STYLING SUITE                      */
+/* Official Layer Color Conventions:                                          */
+/* - Application Layer (ASW): Soft Violet #8b5cf6 / #7c3aed                   */
+/* - Runtime Environment (RTE): Sky Blue #0284c7 / #38bdf8                    */
+/* - BSW Services Layer: Emerald Green #059669 / #10b981                      */
+/* - BSW ECU Abstraction Layer: Warm Amber #d97706 / #f59e0b                  */
+/* - BSW MCAL Layer: Burnt Orange #ea580c / #f97316                           */
+/* - Physical Hardware (HW): Slate / Steel #334155 / #475569                  */
+/* ========================================================================== */
+
+/* View Mode Pills */
+.ecu-view-mode-pills {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 3px 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+}
+
+.ecu-view-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-tech);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.ecu-view-btn:hover {
+  color: #fff;
+  background: rgba(139, 92, 246, 0.15);
+}
+
+.ecu-view-btn.active {
+  background: #8b5cf6;
+  color: #ffffff;
+  font-weight: 800;
+  box-shadow: 0 0 14px rgba(139, 92, 246, 0.45);
+}
+
+/* AUTOSAR Stack Wrapper */
+.autosar-stack-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Meta Banner */
+.autosar-meta-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.12) 0%, rgba(15, 23, 42, 0.8) 100%);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 8px;
+}
+
+.autosar-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.autosar-logo-tag {
+  background: #7c3aed;
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.autosar-platform-badge {
+  background: rgba(2, 132, 199, 0.2);
+  color: #38bdf8;
+  border: 1px solid rgba(2, 132, 199, 0.4);
+  font-family: var(--font-tech);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.autosar-spec-badge {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  font-family: var(--font-tech);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.autosar-asil-badge {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  font-family: var(--font-tech);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.autosar-silicon-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.sil-chip {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sil-chip strong {
+  color: #38bdf8;
+}
+
+/* Real-Time Signal & PDU Flow Sequence Trace */
+.autosar-pdu-trace-banner {
+  background: rgba(10, 15, 30, 0.85);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.trace-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-tech);
+  font-size: 0.72rem;
+  color: #a5f3fc;
+  letter-spacing: 0.5px;
+}
+
+.trace-title .pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: #00f0ff;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #00f0ff;
+  animation: pulse-dot 1.2s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+.trace-title .trace-sub {
+  color: var(--text-dim);
+  font-size: 0.65rem;
+}
+
+.trace-steps-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.trace-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.step-num {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-box {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 5px 8px;
+  display: flex;
+  flex-direction: column;
+  min-width: 110px;
+}
+
+.step-box.orange {
+  border-color: rgba(234, 88, 12, 0.5);
+  background: rgba(234, 88, 12, 0.08);
+}
+
+.step-box.amber {
+  border-color: rgba(217, 119, 6, 0.5);
+  background: rgba(217, 119, 6, 0.08);
+}
+
+.step-box.emerald {
+  border-color: rgba(16, 185, 129, 0.5);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.step-box.sky {
+  border-color: rgba(2, 132, 199, 0.5);
+  background: rgba(2, 132, 199, 0.08);
+}
+
+.step-box.violet {
+  border-color: rgba(139, 92, 246, 0.5);
+  background: rgba(139, 92, 246, 0.08);
+}
+
+.step-lbl {
+  font-size: 0.58rem;
+  font-family: var(--font-tech);
+  color: var(--text-dim);
+  font-weight: 700;
+}
+
+.step-val {
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  color: #fff;
+  font-weight: 700;
+}
+
+.step-sub {
+  font-size: 0.58rem;
+  color: var(--text-dim);
+}
+
+.trace-arrow {
+  color: var(--theme-accent);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  margin: 0 2px;
+}
+
+/* Tiered AUTOSAR Architecture Stack Diagram */
+.autosar-stack-diagram {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.autosar-layer {
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.2s ease;
+}
+
+.autosar-layer .layer-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.layer-tag {
+  font-family: var(--font-tech);
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.layer-tag.violet { background: #7c3aed; color: #fff; }
+.layer-tag.sky { background: #0284c7; color: #fff; }
+.layer-tag.emerald { background: #059669; color: #fff; }
+.layer-tag.slate { background: #475569; color: #fff; }
+
+.layer-name {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: #fff;
+}
+
+.layer-desc {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  margin-left: auto;
+}
+
+/* Layer 1: ASW */
+.autosar-layer-asw {
+  background: rgba(124, 58, 237, 0.06);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+}
+
+.swc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.autosar-swc-card {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 6px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.autosar-swc-card:hover {
+  border-color: rgba(139, 92, 246, 0.6);
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.2);
+}
+
+.swc-card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.swc-icon {
+  font-size: 1.1rem;
+}
+
+.swc-title strong {
+  display: block;
+  font-size: 0.8rem;
+  color: #e9d5ff;
+}
+
+.swc-type {
+  font-size: 0.62rem;
+  color: #a855f7;
+  font-family: var(--font-tech);
+}
+
+.swc-desc {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  line-height: 1.3;
+}
+
+.port-subhead, .runnable-subhead {
+  font-size: 0.58rem;
+  font-family: var(--font-tech);
+  color: var(--text-dim);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.port-chips, .runnable-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.port-chip {
+  font-size: 0.62rem;
+  font-family: var(--font-mono);
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.port-chip.p-port {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.port-chip.r-port {
+  background: rgba(2, 132, 199, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(2, 132, 199, 0.35);
+}
+
+.port-glyph {
+  font-weight: 800;
+}
+
+.runnable-chip {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.62rem;
+  font-family: var(--font-mono);
+  color: #e2e8f0;
+}
+
+.run-trigger {
+  color: #f59e0b;
+  font-size: 0.55rem;
+  margin-left: 2px;
+}
+
+/* Layer 2: RTE */
+.autosar-layer-rte {
+  background: rgba(2, 132, 199, 0.07);
+  border: 1px solid rgba(2, 132, 199, 0.35);
+}
+
+.rte-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .rte-grid { grid-template-columns: 1fr; }
+}
+
+.rte-subhead {
+  font-size: 0.62rem;
+  font-family: var(--font-tech);
+  color: #38bdf8;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.rte-signal-chips {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 6px;
+}
+
+.rte-sig-chip {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(2, 132, 199, 0.25);
+  border-radius: 4px;
+  padding: 5px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+}
+
+.rte-sig-chip .sig-name {
+  color: #a5f3fc;
+}
+
+.rte-code-block {
+  background: rgba(5, 8, 17, 0.85);
+  border: 1px solid rgba(2, 132, 199, 0.2);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: #e2e8f0;
+  line-height: 1.4;
+  max-height: 110px;
+  overflow-y: auto;
+  margin: 0;
+}
+
+/* Layer 3: BSW */
+.autosar-layer-bsw {
+  background: rgba(5, 150, 105, 0.05);
+  border: 1px solid rgba(5, 150, 105, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bsw-subtier {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 6px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.subtier-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tier-pill {
+  font-family: var(--font-tech);
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.tier-pill.green { background: #059669; color: #fff; }
+.tier-pill.amber { background: #d97706; color: #fff; }
+.tier-pill.orange { background: #ea580c; color: #fff; }
+
+.tier-desc {
+  font-size: 0.62rem;
+  color: var(--text-dim);
+}
+
+.modules-horizontal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+  gap: 8px;
+}
+
+.autosar-module-block {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.autosar-module-block:hover {
+  transform: translateY(-2px);
+  border-color: #00f0ff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+.service-block { border-left: 3px solid #10b981; }
+.abs-block { border-left: 3px solid #f59e0b; }
+.mcal-block { border-left: 3px solid #ea580c; }
+
+.mod-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mod-name {
+  font-family: var(--font-tech);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.mod-cat {
+  font-size: 0.55rem;
+  color: var(--text-dim);
+}
+
+.mod-full {
+  font-size: 0.62rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mod-desc {
+  font-size: 0.58rem;
+  color: var(--text-dim);
+  line-height: 1.25;
+}
+
+/* Layer 4: Hardware */
+.autosar-layer-hw {
+  background: rgba(51, 65, 85, 0.2);
+  border: 1px solid rgba(100, 116, 139, 0.35);
+}
+
+.hw-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.hw-item-card {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.hw-item-icon {
+  font-size: 1.3rem;
+  margin-top: 2px;
+}
+
+.hw-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hw-item-lbl {
+  font-size: 0.58rem;
+  font-family: var(--font-tech);
+  color: var(--text-dim);
+  font-weight: 700;
+}
+
+.hw-item-val {
+  font-size: 0.75rem;
+  font-family: var(--font-tech);
+}
+
+.hw-item-meta {
+  font-size: 0.6rem;
+  color: var(--text-dim);
+}
+
+/* Interactive Module Inspector Drawer */
+.autosar-module-inspector {
+  margin-top: 10px;
+  animation: slide-down 0.25s ease;
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.inspector-card {
+  background: #0b1120;
+  border: 1px solid #00f0ff;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 240, 255, 0.25);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inspector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 10px;
+}
+
+.ins-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ins-badge {
+  background: #00f0ff;
+  color: #050b14;
+  font-family: var(--font-tech);
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.ins-title {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #fff;
+}
+
+.ins-close-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-radius: 4px;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ins-close-btn:hover {
+  background: rgba(239, 68, 68, 0.4);
+  border-color: #ef4444;
+}
+
+.ins-desc {
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  line-height: 1.4;
+}
+
+.ins-sec-title {
+  display: block;
+  font-size: 0.65rem;
+  font-family: var(--font-tech);
+  font-weight: 800;
+  color: #38bdf8;
+  margin-bottom: 4px;
+}
+
+.ins-code-block {
+  background: #050811;
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 4px;
+  padding: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #a5f3fc;
+  overflow-x: auto;
+  margin: 0;
+}
+
+.ins-props-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.prop-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 6px 8px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+}
+
+.prop-item .k { color: var(--text-dim); }
+.prop-item .v { font-weight: 700; color: #fff; }
+
+/* Formal ARXML Inspector */
+.arxml-viewer-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.arxml-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 8px 14px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.arxml-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.arxml-tag {
+  background: #10b981;
+  color: #050b14;
+  font-family: var(--font-tech);
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.arxml-filename {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.arxml-schema-tag {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+.arxml-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.arxml-editor-box {
+  background: #03060d;
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 8px;
+  padding: 14px;
+  max-height: 520px;
+  overflow: auto;
+}
+
+.arxml-code {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #7dd3fc;
+  line-height: 1.45;
+  margin: 0;
+  white-space: pre;
+}
+
+.btn-outline-green {
+  border: 1px solid #10b981;
+  color: #34d399;
+  background: transparent;
+}
+
+.btn-outline-green:hover {
+  background: rgba(16, 185, 129, 0.2);
+}
